@@ -1,0 +1,21 @@
+{
+  "name": "root",
+  "private": true,
+  "workspaces": {
+    "nohoist": [
+      "modules/*"
+    ]
+  },
+  "scripts": {
+    "tsc": "tsc --noEmit",
+    "android": "cd modules/mobile && yarn android",
+    "ios": "cd modules/mobile && yarn ios",
+    "pods": "cd modules/mobile/ios && pod install",
+    "installMobile": "cd modules/mobile && yarn",
+    "installWeb": "cd modules/web && yarn",
+    "web": "cd modules/web && yarn dev"
+  },
+  "devDependencies": {
+    "lerna": "^5.4.3"
+  }
+}

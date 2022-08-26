@@ -1,0 +1,10 @@
+// prettier-ignore
+{
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "strict": true,  
+    "forceConsistentCasingInFileNames": true,      
+    "esModuleInterop": true,
+    "jsx": "preserve",
+  }
+}
