@@ -2,36 +2,37 @@ import type {NextApiRequest, NextApiResponse} from 'next';
 import {feeds} from './data/db';
 import {JSDOM} from 'jsdom';
 import RssParser from 'rss-parser';
-import {FeedItem} from './models/feed';
+import {Feed, FeedItem} from '../../graphql/__generated__/types';
 
-type Data = {data: FeedItem[]};
+type Data = {data: Feed[]};
 
 export default async function handler(
   _req: NextApiRequest,
   res: NextApiResponse<Data>,
 ) {
   const feedData = feeds;
-  const data: FeedItem[] = (
-    await Promise.allSettled<FeedItem>(
+  const data: Feed[] = (
+    await Promise.allSettled<Feed>(
       feedData.map(async feed => {
         const siteSource = await (await fetch(feed.url)).text();
         const rssLink = await getRssLinkFromSite(siteSource, feed.url);
         const rssResult = await new RssParser().parseURL(rssLink);
 
         return {
+          id: feed.id,
           title: rssResult.title,
-          url: rssResult.feedUrl,
+          url: rssResult.feedUrl ?? '',
           feedItems: rssResult.items.map(item => ({
             title: item.title,
             description: item.contentSnippet,
-            url: item.link,
-            date: item.isoDate,
-            id: item.guid,
+            url: item.link ?? '',
+            date: item.isoDate ?? '',
+            id: item.guid ?? '',
           })),
         };
       }),
     )
-  ).reduce<FeedItem[]>(organizeResultsReducer, []);
+  ).reduce(organizeResultsReducer, []);
 
   res.status(200).json({data});
 }
@@ -52,6 +53,6 @@ const getRssLinkFromSite = async (
 
 /** Filters rejected requests and returns values on fulfilled ones */
 const organizeResultsReducer = (
-  acc: FeedItem[],
-  next: PromiseSettledResult<FeedItem>,
+  acc: Feed[],
+  next: PromiseSettledResult<Feed>,
 ) => (next.status === 'fulfilled' ? [...acc, next.value] : acc);

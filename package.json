@@ -13,7 +13,8 @@
     "pods": "cd modules/mobile/ios && pod install",
     "installMobile": "cd modules/mobile && yarn",
     "installWeb": "cd modules/web && yarn",
-    "web": "cd modules/web && yarn dev"
+    "web": "cd modules/web && yarn dev",
+    "db": "cd modules/web && yarn db"
   },
   "devDependencies": {
     "@types/jest": "^29.0.0",
