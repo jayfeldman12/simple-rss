@@ -11,7 +11,7 @@ export class FeedApi extends RESTDataSource {
   }
 
   public getAllFeeds = () => {
-    return feeds;
+    return []; //feeds; need DB connection
   };
 
   public getFeedInfo = async (feed: Feed): Promise<Feed> => {
