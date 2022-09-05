@@ -1,5 +1,4 @@
 import {RESTDataSource} from 'apollo-datasource-rest';
-import {feeds} from '../../pages/api/data/db';
 import {Feed, FeedItem} from '../__generated__/types';
 
 import {JSDOM} from 'jsdom';
