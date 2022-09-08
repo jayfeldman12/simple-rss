@@ -1,10 +1,9 @@
 import type {NextPage} from 'next';
 import Head from 'next/head';
-import Image from 'next/image';
-import {useEffect} from 'react';
-import {useQuery} from 'urql';
-import {Feed} from '../graphql/__generated__/types';
-import {FeedQuery} from '../queries/feeds';
+import {useState} from 'react';
+import {useMutation, useQuery} from 'urql';
+import {Feed, FeedItem, Maybe} from '../graphql/models/types';
+import {FeedQuery, MarkRead} from '../queries/feedQuery';
 import styles from '../styles/Home.module.css';
 
 type FeedResponse = {
@@ -12,8 +11,21 @@ type FeedResponse = {
 };
 
 const Home: NextPage = () => {
-  const [result] = useQuery<FeedResponse>({query: FeedQuery});
-  console.log('result', result);
+  const [username, setUsername] = useState('');
+  const [pauseQueries, setPauseQueries] = useState(true);
+  const [feedResult] = useQuery<FeedResponse>({
+    query: FeedQuery,
+    variables: {username},
+    pause: pauseQueries,
+  });
+  const [markReadResult, markRead] = useMutation(MarkRead);
+  console.log('results', feedResult);
+  console.log('mark read', markReadResult);
+
+  const onItemClick = (feed: Feed, item: Maybe<FeedItem>) => {
+    if (!item) return;
+    markRead({username, feedId: feed._id, feedItemId: item.id});
+  };
 
   return (
     <div className={styles.container}>
@@ -25,9 +37,27 @@ const Home: NextPage = () => {
 
       <main className={styles.main}>
         <h1 className={styles.title}>Welcome to Simple RSS</h1>
+        <h2>Username</h2>
+        <input onChange={event => setUsername(event.target.value)}></input>
+        <button style={{marginTop: 20}} onClick={() => setPauseQueries(false)}>
+          Submit
+        </button>
+        {!feedResult.fetching &&
+        feedResult.error?.message?.includes('No user found') ? (
+          <p>Invalid username</p>
+        ) : null}
 
-        {result.data?.feeds?.map(feed => (
-          <p key={feed.title}>{feed.rssUrl}</p>
+        {feedResult.data?.feeds?.map(feed => (
+          <div key={feed.url}>
+            <a href={feed.url}>
+              <h3>{feed.url}</h3>
+            </a>
+            {feed.feedItems?.map(item => (
+              <a onClick={() => onItemClick(feed, item)} key={item?.id}>
+                <p>{item?.url}</p>
+              </a>
+            ))}
+          </div>
         ))}
       </main>
     </div>

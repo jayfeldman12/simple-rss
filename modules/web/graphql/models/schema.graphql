@@ -16,7 +16,7 @@ A URL users subscribe to for RSS feeds
 type Feed {
   description: String
   feedItems: [FeedItem]
-  id: ID!
+  _id: ID!
 
   """
   A list of IDs on this feed a user has read. Used to highlight unread items

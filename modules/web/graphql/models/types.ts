@@ -29,7 +29,7 @@ export type Feed = {
   __typename?: 'Feed';
   description?: Maybe<Scalars['String']>;
   feedItems?: Maybe<Array<Maybe<FeedItem>>>;
-  id: Scalars['ID'];
+  _id: Scalars['ID'];
   /** A list of IDs on this feed a user has read. Used to highlight unread items */
   reads?: Maybe<Array<Maybe<Scalars['ID']>>>;
   /** URL of the RRS feed, can be used to get new items. If empty or erroring, this will be fetched from the main URL. */

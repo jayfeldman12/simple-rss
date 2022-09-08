@@ -8,18 +8,22 @@ export const logger: PluginDefinition = {
     return {
       // Fires whenever Apollo Server will parse a GraphQL
       // request to create its associated document AST.
-      async parsingDidStart(requestContext) {
+      async parsingDidStart() {
         console.log('Parsing started!');
       },
 
       // Fires whenever Apollo Server will validate a
       // request's document AST against your GraphQL schema.
-      async validationDidStart(requestContext) {
+      async validationDidStart() {
         console.log('Validation started!');
       },
 
-      async willSendResponse(requestContext) {
+      async willSendResponse() {
         console.log('response sent');
+      },
+
+      async didEncounterErrors(errorContext) {
+        console.log('found an error', errorContext.errors);
       },
     };
   },

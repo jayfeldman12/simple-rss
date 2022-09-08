@@ -3,16 +3,30 @@ import {gql} from 'apollo-server';
 export const typeDefs = gql`
   type Query {
     "Get all fields user has subscribed to"
-    feeds: [Feed]
+    feeds(username: String!): [Feed]
     "If passed in a feed ID, return all RSS items for that feed. Otherwise, return all feeds items"
-    feedItems: [FeedItem]
+    feedItems(feedId: ID!): [FeedItem]
+    "Get all unread items for all feeds"
+    unreadFeedItems: [FeedItem]
+  }
+
+  type Mutation {
+    markRead(
+      username: String!
+      feedId: String!
+      feedItemId: String!
+    ): MarkReadResponse
+  }
+
+  type MarkReadResponse {
+    success: Boolean!
   }
 
   "A URL users subscribe to for RSS feeds"
   type Feed {
     description: String
     feedItems: [FeedItem]
-    id: ID!
+    _id: ID!
     "A list of IDs on this feed a user has read. Used to highlight unread items"
     reads: [ID]
     """

@@ -1,5 +1,5 @@
 import {RESTDataSource} from 'apollo-datasource-rest';
-import {Feed, FeedItem} from '../__generated__/types';
+import {Feed, FeedItem} from '../models/types';
 
 import {JSDOM} from 'jsdom';
 import RssParser from 'rss-parser';
@@ -9,32 +9,31 @@ export class FeedApi extends RESTDataSource {
     super();
   }
 
-  public getAllFeeds = () => {
-    return []; //feeds; need DB connection
-  };
-
-  public getFeedInfo = async (feed: Feed): Promise<Feed> => {
+  public getFeedInfo = async (
+    feed: Feed,
+    updateFeedWithRss: (rssLink: string, feedId: string) => unknown,
+  ): Promise<Feed> => {
     if (feed.rssUrl) {
       return feed;
     }
     const response = await this.get(feed?.url);
-
+    const rssUrl = await this.getRssLinkFromSite(response, feed.url);
+    updateFeedWithRss(rssUrl, feed._id);
     return {
       ...feed,
-      rssUrl: await this.getRssLinkFromSite(response, feed.url),
+      rssUrl,
     };
   };
 
   public getFeedItems = async (rssUrl: string): Promise<FeedItem[]> => {
     const response = await this.get(rssUrl);
     const result = await new RssParser().parseString(response);
-
     return result.items.map(item => ({
       title: item.title,
       description: item.contentSnippet,
       url: item.link ?? '',
       date: item.isoDate ?? '',
-      id: item.guid ?? '',
+      id: item.guid ?? item.link ?? '',
     }));
   };
 
