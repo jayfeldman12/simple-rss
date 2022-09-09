@@ -3,12 +3,14 @@ import {DEFAULT_TTL_SECONDS} from '../consts';
 import {Users} from '../models/users';
 import {Document} from 'mongoose';
 import {ObjectId} from 'mongodb';
+import {Feed} from '../models/types';
+import {FeedApi} from './feedApi';
 
 export default class UsersApi extends MongoDataSource<Users> {
-  // @ts-expect-error it's assigned in the super
+  // @ts-expect-error not uninitialized, it's assigned in the super
   protected collection: Collection<Document>;
 
-  public async getFeedFromUser(username: string) {
+  public async getUser(username: string) {
     if (!username) {
       throw new Error('Username missing');
     }
@@ -30,17 +32,21 @@ export default class UsersApi extends MongoDataSource<Users> {
     feedItemId: string,
   ): Promise<{success: boolean}> => {
     try {
-      console.log('marking', username, feedId, feedItemId);
-      console.log('matcher', {username, 'feeds._id': feedId});
       const response = await this.collection.updateOne(
         {username, 'feeds._id': new ObjectId(feedId)},
         {$addToSet: {'feeds.$.reads': feedItemId}},
       );
-      console.log('response mark true', response);
       return {success: response.modifiedCount > 0};
     } catch {
       return {success: false};
     }
+  };
+
+  public addFeed = async (feed: Feed, feedApi: FeedApi, username: string) => {
+    if (!feed.rssUrl) {
+      feed.rssUrl = await feedApi.getRssLinkFromUrl(feed?.url);
+    }
+    this.collection.updateOne({username}, {$addToSet: {feeds: feed}});
   };
 
   public async updateRssLinkForUser(

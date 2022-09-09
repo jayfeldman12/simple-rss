@@ -20,8 +20,26 @@ export type Query = {
   __typename?: 'Query';
   /** Get all fields user has subscribed to */
   feeds?: Maybe<Array<Maybe<Feed>>>;
-  /** If passed in a feed ID, return all RSS items for that feed. Otherwise, return all feeds items */
-  feedItems?: Maybe<Array<Maybe<FeedItem>>>;
+};
+
+export type QueryFeedsArgs = {
+  username: Scalars['String'];
+};
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  markRead?: Maybe<MarkReadResponse>;
+};
+
+export type MutationMarkReadArgs = {
+  username: Scalars['String'];
+  feedId: Scalars['String'];
+  feedItemId: Scalars['String'];
+};
+
+export type MarkReadResponse = {
+  __typename?: 'MarkReadResponse';
+  success: Scalars['Boolean'];
 };
 
 /** A URL users subscribe to for RSS feeds */
@@ -33,10 +51,15 @@ export type Feed = {
   /** A list of IDs on this feed a user has read. Used to highlight unread items */
   reads?: Maybe<Array<Maybe<Scalars['ID']>>>;
   /** URL of the RRS feed, can be used to get new items. If empty or erroring, this will be fetched from the main URL. */
-  rssUrl?: Maybe<Scalars['String']>;
+  rssUrl: Scalars['String'];
   title?: Maybe<Scalars['String']>;
   /** URL of the main site */
   url: Scalars['String'];
+};
+
+/** A URL users subscribe to for RSS feeds */
+export type FeedFeedItemsArgs = {
+  onlyUnread?: InputMaybe<Scalars['Boolean']>;
 };
 
 /** RSS feed item */
@@ -47,4 +70,5 @@ export type FeedItem = {
   id: Scalars['ID'];
   title?: Maybe<Scalars['String']>;
   url: Scalars['String'];
+  isRead: Scalars['Boolean'];
 };

@@ -9,45 +9,40 @@ export class FeedApi extends RESTDataSource {
     super();
   }
 
-  public getFeedInfo = async (
-    feed: Feed,
-    updateFeedWithRss: (rssLink: string, feedId: string) => unknown,
-  ): Promise<Feed> => {
-    if (feed.rssUrl) {
-      return feed;
-    }
-    const response = await this.get(feed?.url);
-    const rssUrl = await this.getRssLinkFromSite(response, feed.url);
-    updateFeedWithRss(rssUrl, feed._id);
-    return {
-      ...feed,
-      rssUrl,
-    };
-  };
-
-  public getFeedItems = async (rssUrl: string): Promise<FeedItem[]> => {
+  public getItemsFromFeed = async (
+    {rssUrl, reads}: Feed,
+    onlyUnread?: boolean,
+  ): Promise<(FeedItem | undefined)[]> => {
+    // url.searchParams.set('numItems', DEFAULT_FEED_ITEM_COUNT);
     const response = await this.get(rssUrl);
     const result = await new RssParser().parseString(response);
-    return result.items.map(item => ({
-      title: item.title,
-      description: item.contentSnippet,
-      url: item.link ?? '',
-      date: item.isoDate ?? '',
-      id: item.guid ?? item.link ?? '',
-    }));
+    return result.items.map(item => {
+      const id = item.guid || item.link || '';
+      const isRead = reads?.includes(id) ?? false;
+      if (onlyUnread && isRead) return undefined;
+
+      return {
+        title: item.title,
+        description: item.contentSnippet,
+        url: item.link ?? '',
+        date: item.isoDate ?? '',
+        id,
+        isRead,
+      };
+    });
   };
 
-  protected getRssLinkFromSite = async (
-    siteText: string,
-    baseUrl: string,
-  ): Promise<string> => {
+  public getRssLinkFromUrl = async (url: string): Promise<string> => {
+    const siteText = await this.get(url);
+
     const rssLink = new JSDOM(siteText).window.document
       .querySelector('link[type="application/rss+xml"]')
       ?.getAttribute('href');
+
     if (rssLink) {
-      return new URL(rssLink, baseUrl).href;
+      return new URL(rssLink, url).href;
     }
     // If no RSS feed found, reject promise because there will be no data
-    throw Error(`RSS feed URL not found for ${baseUrl}`);
+    throw Error(`RSS feed URL not found for ${url}`);
   };
 }

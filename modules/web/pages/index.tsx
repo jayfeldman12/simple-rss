@@ -1,6 +1,6 @@
 import type {NextPage} from 'next';
 import Head from 'next/head';
-import {useState} from 'react';
+import {useMemo, useState} from 'react';
 import {useMutation, useQuery} from 'urql';
 import {Feed, FeedItem, Maybe} from '../graphql/models/types';
 import {FeedQuery, MarkRead} from '../queries/feedQuery';
@@ -13,14 +13,26 @@ type FeedResponse = {
 const Home: NextPage = () => {
   const [username, setUsername] = useState('');
   const [pauseQueries, setPauseQueries] = useState(true);
-  const [feedResult] = useQuery<FeedResponse>({
+  const [{data: feedResults, fetching, error}] = useQuery<FeedResponse>({
     query: FeedQuery,
-    variables: {username},
+    variables: {username, onlyUnread: true},
     pause: pauseQueries,
   });
   const [markReadResult, markRead] = useMutation(MarkRead);
-  console.log('results', feedResult);
-  console.log('mark read', markReadResult);
+  console.log('results', feedResults);
+
+  const items = useMemo(() => {
+    if (feedResults?.feeds) {
+      const results = feedResults.feeds
+        .flatMap(x => x.feedItems)
+        .filter(x => x);
+
+      results.sort(
+        (a, b) => new Date(b!.date).valueOf() - new Date(a!.date).valueOf(),
+      );
+    }
+    return null;
+  }, [feedResults]);
 
   const onItemClick = (feed: Feed, item: Maybe<FeedItem>) => {
     if (!item) return;
@@ -42,12 +54,11 @@ const Home: NextPage = () => {
         <button style={{marginTop: 20}} onClick={() => setPauseQueries(false)}>
           Submit
         </button>
-        {!feedResult.fetching &&
-        feedResult.error?.message?.includes('No user found') ? (
+        {!fetching && error?.message?.includes('No user found') ? (
           <p>Invalid username</p>
         ) : null}
 
-        {feedResult.data?.feeds?.map(feed => (
+        {feedResults?.feeds?.map(feed => (
           <div key={feed.url}>
             <a href={feed.url}>
               <h3>{feed.url}</h3>

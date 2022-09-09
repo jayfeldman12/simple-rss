@@ -1,15 +1,16 @@
 export const FeedQuery = `
-  query FeedQuery ($username: String!) {
+  query FeedQuery ($username: String!, $onlyUnread: Boolean) {
     feeds(username: $username) {
       description
       title
       url
       _id
       rssUrl
-      feedItems {
+      feedItems (onlyUnread: $onlyUnread){
         url
         title
         id
+        isRead
       }
     }
   }
