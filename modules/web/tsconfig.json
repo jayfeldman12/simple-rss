@@ -19,8 +19,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "graphql/index.ts",
-    "graphql/schema.qs"
+    "pages/api/graphql/index.ts",
+    "pages/api/graphql/schema.qs"
   ],
   "exclude": ["node_modules"]
 }

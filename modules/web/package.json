@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db": "nodemon --exec ts-node graphql/index.ts"
+    "db": "nodemon --exec ts-node pages/api/graphql"
   },
   "dependencies": {
     "apollo-datasource-http": "^0.21.0",

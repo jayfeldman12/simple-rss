@@ -13,7 +13,6 @@ export class FeedApi extends RESTDataSource {
     {rssUrl, reads}: Feed,
     onlyUnread?: boolean,
   ): Promise<(Omit<FeedItem, 'feedItemImage'> | undefined)[]> => {
-    // url.searchParams.set('numItems', DEFAULT_FEED_ITEM_COUNT);
     const response = await this.get(rssUrl);
     const result = await new RssParser().parseString(response);
     return result.items.map(item => {

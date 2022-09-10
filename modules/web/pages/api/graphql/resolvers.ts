@@ -2,7 +2,6 @@ import {Config} from 'apollo-server-core';
 import {FeedApi} from './datasources/feedApi';
 import {Feed, FeedItem, FeedItemImage} from './models/types';
 import UsersApi from './datasources/usersApi';
-import {onlyDefined} from '../utils/onlyDefined';
 
 type RequestContext = {
   dataSources: {
@@ -31,9 +30,9 @@ export const resolvers: Config['resolvers'] = {
       args,
       {dataSources}: RequestContext,
     ): Promise<Omit<FeedItem, 'feedItemImage'>[]> => {
-      return onlyDefined(
-        await dataSources.feedApi.getItemsFromFeed(feed, args.onlyUnread),
-      );
+      return (
+        await dataSources.feedApi.getItemsFromFeed(feed, args.onlyUnread)
+      ).filter(x => x) as FeedItem[];
     },
   },
   FeedItem: {

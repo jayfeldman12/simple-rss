@@ -2,7 +2,7 @@ import type {NextPage} from 'next';
 import Head from 'next/head';
 import {useMemo, useState} from 'react';
 import {useMutation, useQuery} from 'urql';
-import {Feed, FeedItem, Maybe} from '../graphql/models/types';
+import {Feed, FeedItem, Maybe} from './api/graphql/models/types';
 import {FeedQuery, MarkRead} from '../queries/feedQuery';
 import Spinner from 'react-bootstrap/Spinner';
 import Card from 'react-bootstrap/Card';
