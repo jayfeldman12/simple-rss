@@ -8,6 +8,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Button from 'react-bootstrap/Button';
 import '../styles/Home.module.css';
 import {FaExternalLinkAlt} from 'react-icons/fa';
 
@@ -20,10 +21,11 @@ type ItemWithFeedId = FeedItem & {feedId: string};
 const Home: NextPage = () => {
   const [username, setUsername] = useState('');
   const [pauseQueries, setPauseQueries] = useState(true);
+  const [fetchAll, setFetchAll] = useState(false);
   const [{data: feedResults, fetching, error}, refetch] =
     useQuery<FeedResponse>({
       query: FeedQuery,
-      variables: {username, onlyUnread: false},
+      variables: {username, onlyUnread: !fetchAll},
       pause: pauseQueries,
     });
   const [_markReadResult, markRead] = useMutation(MarkRead);
@@ -49,7 +51,6 @@ const Home: NextPage = () => {
     markRead({username, feedId, feedItemId: item.id}).then(refetch);
     window.open(item.url);
   };
-  console.log('results', feedResults);
 
   return (
     <div>
@@ -60,7 +61,7 @@ const Home: NextPage = () => {
       </Head>
 
       <main>
-        <div className="container-fluid text-center py-5 px-5 bg-dark text-white">
+        <div className="container-fluid text-center py-5 px-5 bg-dark text-white height-full">
           <h1>Welcome to Simple RSS</h1>
           <h2>Username</h2>
           <input
@@ -68,8 +69,8 @@ const Home: NextPage = () => {
             onChange={event => setUsername(event.target.value)}
             onKeyDown={e => e.key === 'Enter' && setPauseQueries(false)}
           />
-          <button
-            className="btn btn-primary col-sm-6 my-4"
+          <Button
+            className="col-sm-6 my-4"
             style={{marginTop: 20}}
             onClick={() => setPauseQueries(false)}>
             {fetching ? (
@@ -84,7 +85,7 @@ const Home: NextPage = () => {
             ) : (
               'Submit'
             )}
-          </button>
+          </Button>
           {!fetching && error?.message?.includes('No user found') ? (
             <p>Invalid username</p>
           ) : null}
@@ -120,6 +121,11 @@ const Home: NextPage = () => {
               );
             })}
           </Row>
+          {!feedResults?.feeds || fetchAll ? null : (
+            <Button className="my-5" onClick={() => setFetchAll(true)}>
+              Fetch all items
+            </Button>
+          )}
         </div>
       </main>
     </div>
