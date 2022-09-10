@@ -42,5 +42,10 @@ export const typeDefs = gql`
     title: String
     url: String!
     isRead: Boolean!
+    feedItemImage: FeedItemImage
+  }
+
+  type FeedItemImage {
+    imgSrc: String
   }
 `;

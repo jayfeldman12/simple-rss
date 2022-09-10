@@ -1,5 +1,5 @@
 import {RESTDataSource} from 'apollo-datasource-rest';
-import {Feed, FeedItem} from '../models/types';
+import {Feed, FeedItem, FeedItemImage} from '../models/types';
 
 import {JSDOM} from 'jsdom';
 import RssParser from 'rss-parser';
@@ -12,7 +12,7 @@ export class FeedApi extends RESTDataSource {
   public getItemsFromFeed = async (
     {rssUrl, reads}: Feed,
     onlyUnread?: boolean,
-  ): Promise<(FeedItem | undefined)[]> => {
+  ): Promise<(Omit<FeedItem, 'feedItemImage'> | undefined)[]> => {
     // url.searchParams.set('numItems', DEFAULT_FEED_ITEM_COUNT);
     const response = await this.get(rssUrl);
     const result = await new RssParser().parseString(response);
@@ -20,7 +20,6 @@ export class FeedApi extends RESTDataSource {
       const id = item.guid || item.link || '';
       const isRead = reads?.includes(id) ?? false;
       if (onlyUnread && isRead) return undefined;
-
       return {
         title: item.title,
         description: item.contentSnippet,
@@ -44,5 +43,14 @@ export class FeedApi extends RESTDataSource {
     }
     // If no RSS feed found, reject promise because there will be no data
     throw Error(`RSS feed URL not found for ${url}`);
+  };
+
+  public getImageFromItem = async ({url}: FeedItem): Promise<FeedItemImage> => {
+    const response = await this.get(url);
+    const imgSrc =
+      new JSDOM(response).window.document
+        .querySelector('meta[property="og:image"]')
+        ?.getAttribute('content') ?? null;
+    return {imgSrc};
   };
 }

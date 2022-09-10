@@ -1,4 +1,8 @@
 .container {
+  flex: 1;
+  height: 900rem;
+}
+/* .container {
   padding: 0 2rem;
 }
 
@@ -126,4 +130,4 @@
   .logo img {
     filter: invert(1);
   }
-}
+} */

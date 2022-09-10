@@ -9,8 +9,13 @@ export const FeedQuery = `
       feedItems (onlyUnread: $onlyUnread){
         url
         title
+        description
+        date
         id
         isRead
+        feedItemImage {
+          imgSrc
+        }
       }
     }
   }

@@ -1,11 +1,9 @@
-import '../styles/globals.css';
 import type {AppProps} from 'next/app';
-import {createClient, fetchExchange, Provider} from 'urql';
+import {fetchExchange} from 'urql';
 import {withUrqlClient} from 'next-urql';
-
-// const client = createClient({
-//   url: 'http://localhost:4000/graphql',
-// });
+import Head from 'next/head';
+import '../styles/custom.scss';
+import '../styles/globals.css';
 
 const withUrql = withUrqlClient(() => ({
   url: 'http://localhost:4000/graphql',
@@ -13,7 +11,14 @@ const withUrql = withUrqlClient(() => ({
 }));
 
 const App = ({Component, pageProps}: AppProps) => {
-  return <Component {...pageProps} />;
+  return (
+    <>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+      <Component {...pageProps} />
+    </>
+  );
 };
 
 export default withUrql(App);
