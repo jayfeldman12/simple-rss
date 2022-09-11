@@ -4,8 +4,6 @@ import {Feed, FeedItem, FeedItemImage} from '../models/types';
 import {JSDOM} from 'jsdom';
 import RssParser from 'rss-parser';
 
-const API_TIMEOUT = 5000; // 5 seconds
-
 export class FeedApi extends RESTDataSource {
   constructor() {
     super();
@@ -15,7 +13,7 @@ export class FeedApi extends RESTDataSource {
     {rssUrl, reads}: Feed,
     onlyUnread?: boolean,
   ): Promise<(Omit<FeedItem, 'feedItemImage'> | undefined)[]> => {
-    const response = await this.get(rssUrl, undefined, {timeout: API_TIMEOUT});
+    const response = await this.withTimeout(this.get(rssUrl));
     const result = await new RssParser().parseString(response);
     return result.items.map(item => {
       const id = item.guid || item.link || '';
@@ -33,7 +31,7 @@ export class FeedApi extends RESTDataSource {
   };
 
   public getRssLinkFromUrl = async (url: string): Promise<string> => {
-    const siteText = await this.get(url, undefined, {timeout: API_TIMEOUT});
+    const siteText = await this.withTimeout(this.get(url));
 
     const rssLink = new JSDOM(siteText).window.document
       .querySelector('link[type="application/rss+xml"]')
@@ -47,11 +45,23 @@ export class FeedApi extends RESTDataSource {
   };
 
   public getImageFromItem = async ({url}: FeedItem): Promise<FeedItemImage> => {
-    const response = await this.get(url, {timeout: API_TIMEOUT});
+    const response = await this.withTimeout(this.get(url));
     const imgSrc =
       new JSDOM(response).window.document
         .querySelector('meta[property="og:image"]')
         ?.getAttribute('content') ?? null;
     return {imgSrc};
+  };
+
+  // Adds a timeout, in ms, that the request will reject if it's not completed in that time
+  protected withTimeout = <T extends unknown>(
+    request: Promise<T>,
+    timeout = 5000,
+  ): Promise<T> => {
+    let timeoutRef: NodeJS.Timeout;
+    return Promise.race([
+      request,
+      new Promise<T>((_, reject) => (timeoutRef = setTimeout(reject, timeout))),
+    ]).finally(() => clearTimeout(timeoutRef));
   };
 }
