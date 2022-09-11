@@ -31,3 +31,5 @@ const server = new ApolloServer({
 server.listen().then(() => {
   console.log(`Server started`);
 });
+
+export default server;
