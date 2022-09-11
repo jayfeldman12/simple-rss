@@ -6,7 +6,7 @@ import '../styles/custom.scss';
 import '../styles/globals.css';
 
 const withUrql = withUrqlClient(() => ({
-  url: process.env.NEXT_PUBLIC_VERCEL_URL + '/api/graphql',
+  url: '/api/graphql',
   exchanges: [fetchExchange],
 }));
 
