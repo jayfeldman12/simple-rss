@@ -4,6 +4,8 @@ import {Feed, FeedItem, FeedItemImage} from '../models/types';
 import {JSDOM} from 'jsdom';
 import RssParser from 'rss-parser';
 
+const API_TIMEOUT = 5000; // 5 seconds
+
 export class FeedApi extends RESTDataSource {
   constructor() {
     super();
@@ -13,7 +15,7 @@ export class FeedApi extends RESTDataSource {
     {rssUrl, reads}: Feed,
     onlyUnread?: boolean,
   ): Promise<(Omit<FeedItem, 'feedItemImage'> | undefined)[]> => {
-    const response = await this.get(rssUrl);
+    const response = await this.get(rssUrl, undefined, {timeout: API_TIMEOUT});
     const result = await new RssParser().parseString(response);
     return result.items.map(item => {
       const id = item.guid || item.link || '';
@@ -31,7 +33,7 @@ export class FeedApi extends RESTDataSource {
   };
 
   public getRssLinkFromUrl = async (url: string): Promise<string> => {
-    const siteText = await this.get(url);
+    const siteText = await this.get(url, undefined, {timeout: API_TIMEOUT});
 
     const rssLink = new JSDOM(siteText).window.document
       .querySelector('link[type="application/rss+xml"]')
@@ -45,7 +47,7 @@ export class FeedApi extends RESTDataSource {
   };
 
   public getImageFromItem = async ({url}: FeedItem): Promise<FeedItemImage> => {
-    const response = await this.get(url);
+    const response = await this.get(url, {timeout: API_TIMEOUT});
     const imgSrc =
       new JSDOM(response).window.document
         .querySelector('meta[property="og:image"]')
