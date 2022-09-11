@@ -3,7 +3,7 @@ import {typeDefs} from './schema';
 import {resolvers} from './resolvers';
 import {FeedApi} from './datasources/feedApi';
 import {logger} from './logger';
-import {MongoClient} from 'mongodb';
+import {Logger, MongoClient} from 'mongodb';
 import UsersApi from './datasources/usersApi';
 import dotenv from 'dotenv';
 
@@ -14,6 +14,8 @@ if (!process.env.MONGODB_URI) {
 }
 
 const mongoClient = new MongoClient(process.env.MONGODB_URI ?? '');
+
+Logger.setLevel('debug');
 mongoClient.connect();
 
 const server = new ApolloServer({

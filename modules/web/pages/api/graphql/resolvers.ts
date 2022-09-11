@@ -17,12 +17,13 @@ export const resolvers: Config['resolvers'] = {
     },
   },
   Mutation: {
-    markRead: async (_parent, args, {dataSources}: RequestContext) =>
-      dataSources.usersApi.markRead(
+    markRead: async (_parent, args, {dataSources}: RequestContext) => {
+      return dataSources.usersApi.markRead(
         args.username,
         args.feedId,
         args.feedItemId,
-      ),
+      );
+    },
   },
   Feed: {
     feedItems: async (

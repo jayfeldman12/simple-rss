@@ -36,6 +36,7 @@ export default class UsersApi extends MongoDataSource<Users> {
         {username, 'feeds._id': new ObjectId(feedId)},
         {$addToSet: {'feeds.$.reads': feedItemId}},
       );
+      await this.deleteFromCacheByFields({username});
       return {success: response.modifiedCount > 0};
     } catch {
       return {success: false};
@@ -46,7 +47,8 @@ export default class UsersApi extends MongoDataSource<Users> {
     if (!feed.rssUrl) {
       feed.rssUrl = await feedApi.getRssLinkFromUrl(feed?.url);
     }
-    this.collection.updateOne({username}, {$addToSet: {feeds: feed}});
+    await this.collection.updateOne({username}, {$addToSet: {feeds: feed}});
+    await this.deleteFromCacheByFields({username});
   };
 
   public async updateRssLinkForUser(
@@ -59,9 +61,10 @@ export default class UsersApi extends MongoDataSource<Users> {
       return;
     }
 
-    this.collection.updateOne(
+    await this.collection.updateOne(
       {username, 'feeds._id': feedId},
       {$set: {'feeds.$.rssUrl': rssUrl}},
     );
+    await this.deleteFromCacheByFields({username});
   }
 }

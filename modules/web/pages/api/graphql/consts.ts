@@ -1,1 +1,1 @@
-export const DEFAULT_TTL_SECONDS = 5 * 60; // 5 minutes
+export const DEFAULT_TTL_SECONDS = 20 * 60; // 20 minutes
