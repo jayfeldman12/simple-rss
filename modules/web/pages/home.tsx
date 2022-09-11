@@ -47,7 +47,6 @@ const Home: NextPage = () => {
 
   const onItemClick = (feedId: string, item: Maybe<FeedItem>) => {
     if (!item) return;
-    console.log('item', item);
     markRead({username, feedId, feedItemId: item.id}).then(refetch);
     window.open(item.url);
   };

@@ -1,4 +1,4 @@
-import {Config} from 'apollo-server-core';
+import {Config} from 'apollo-server-nextjs';
 import {FeedApi} from './datasources/feedApi';
 import {Feed, FeedItem, FeedItemImage} from './models/types';
 import UsersApi from './datasources/usersApi';

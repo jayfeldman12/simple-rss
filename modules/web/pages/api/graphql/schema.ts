@@ -1,4 +1,4 @@
-import {gql} from 'apollo-server';
+import {gql} from 'apollo-server-nextjs';
 
 export const typeDefs = gql`
   type Query {

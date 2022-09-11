@@ -1,4 +1,4 @@
-import {ApolloServer} from 'apollo-server';
+import {ApolloServer} from 'apollo-server-nextjs';
 import {typeDefs} from './schema';
 import {resolvers} from './resolvers';
 import {FeedApi} from './datasources/feedApi';
@@ -28,8 +28,10 @@ const server = new ApolloServer({
   plugins: [logger],
 });
 
-server.listen().then(() => {
-  console.log(`Server started`);
-});
+export default server.createHandler();
 
-export default server;
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
