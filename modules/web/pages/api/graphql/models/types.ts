@@ -71,10 +71,5 @@ export type FeedItem = {
   title?: Maybe<Scalars['String']>;
   url: Scalars['String'];
   isRead: Scalars['Boolean'];
-  feedItemImage: FeedItemImage;
-};
-
-export type FeedItemImage = {
-  __typename?: 'FeedItem';
-  imgSrc: Maybe<Scalars['String']>;
+  image: Maybe<Scalars['String']>;
 };

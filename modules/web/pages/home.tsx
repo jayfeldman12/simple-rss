@@ -139,10 +139,10 @@ const Home: NextPage = () => {
                     style={{borderWidth: '0.3rem', cursor: 'pointer'}}
                     border={`${item.isRead ? '' : 'info'}`}
                     onClick={() => onItemClick(item.feedId, item)}>
-                    {item.feedItemImage?.imgSrc ? (
+                    {item.image ? (
                       <Card.Img
                         variant="top"
-                        src={item.feedItemImage.imgSrc}
+                        src={item.image}
                         style={{
                           maxHeight: '10rem',
                           minHeight: '8rem',

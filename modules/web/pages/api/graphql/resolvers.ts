@@ -1,6 +1,6 @@
 import {Config} from 'apollo-server-nextjs';
 import {FeedApi} from './datasources/feedApi';
-import {Feed, FeedItem, FeedItemImage} from './models/types';
+import {Feed, FeedItem} from './models/types';
 import UsersApi from './datasources/usersApi';
 
 type RequestContext = {
@@ -30,19 +30,10 @@ export const resolvers: Config['resolvers'] = {
       feed: Feed,
       args,
       {dataSources}: RequestContext,
-    ): Promise<Omit<FeedItem, 'feedItemImage'>[]> => {
+    ): Promise<FeedItem[]> => {
       return (
         await dataSources.feedApi.getItemsFromFeed(feed, args.onlyUnread)
       ).filter(x => x) as FeedItem[];
-    },
-  },
-  FeedItem: {
-    feedItemImage: async (
-      feedItem: FeedItem,
-      _args,
-      {dataSources}: RequestContext,
-    ): Promise<FeedItemImage> => {
-      return dataSources.feedApi.getImageFromItem(feedItem);
     },
   },
 };

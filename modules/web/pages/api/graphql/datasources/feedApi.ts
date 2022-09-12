@@ -1,5 +1,5 @@
 import {RESTDataSource} from 'apollo-datasource-rest';
-import {Feed, FeedItem, FeedItemImage} from '../models/types';
+import {Feed, FeedItem} from '../models/types';
 
 import {JSDOM} from 'jsdom';
 import RssParser from 'rss-parser';
@@ -15,12 +15,29 @@ export class FeedApi extends RESTDataSource {
   public getItemsFromFeed = async (
     {rssUrl, reads}: Feed,
     onlyUnread?: boolean,
-  ): Promise<(Omit<FeedItem, 'feedItemImage'> | undefined)[]> => {
+  ): Promise<(FeedItem | undefined)[]> => {
     const response = await this.withTimeout(
       this.get(rssUrl, undefined, {cacheOptions: {ttl: FEED_REFRESH_TTL}}),
     );
     const result = await new RssParser().parseString(response);
     return result.items.map(item => {
+      const image = (() => {
+        if (item.enclosure?.url) return item.enclosure.url;
+
+        const content = new JSDOM(item.content).window.document;
+
+        const img = content.querySelector('img')?.getAttribute('src');
+        if (img) return img;
+
+        const contentEncoded = new JSDOM(item['content:encoded']).window
+          .document;
+
+        const aHref = Array.from(contentEncoded.querySelectorAll('a'))
+          .find(aTag => aTag.getAttribute('href')?.match(/png|jgp|svg|gif/))
+          ?.getAttribute('href');
+        return aHref ?? '';
+      })();
+
       const id = item.guid || item.link || '';
       const isRead = reads?.includes(id) ?? false;
       if (onlyUnread && isRead) return undefined;
@@ -31,6 +48,7 @@ export class FeedApi extends RESTDataSource {
         date: item.isoDate ?? '',
         id,
         isRead,
+        image: image ?? '',
       };
     });
   };
@@ -49,17 +67,6 @@ export class FeedApi extends RESTDataSource {
     }
     // If no RSS feed found, reject promise because there will be no data
     throw Error(`RSS feed URL not found for ${url}`);
-  };
-
-  public getImageFromItem = async ({url}: FeedItem): Promise<FeedItemImage> => {
-    const response = await this.withTimeout(
-      this.get(url, undefined, {cacheOptions: {ttl: ONE_DAY}}),
-    );
-    const imgSrc =
-      new JSDOM(response).window.document
-        .querySelector('meta[property="og:image"]')
-        ?.getAttribute('content') ?? null;
-    return {imgSrc};
   };
 
   // Adds a timeout, in ms, that the request will reject if it's not completed in that time

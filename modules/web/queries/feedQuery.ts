@@ -17,9 +17,7 @@ export const FeedQuery = gql`
         date
         id
         isRead
-        feedItemImage {
-          imgSrc
-        }
+        image
       }
     }
   }
