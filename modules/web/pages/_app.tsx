@@ -7,9 +7,9 @@ import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
+      retry: 0,
       retryDelay: failureCount => (failureCount + 1) * 1000,
-      staleTime: 1000 * 60 * 19, // 19 minutes
+      staleTime: 1000 * 60 * 19, // 21 minutes
     },
   },
 });

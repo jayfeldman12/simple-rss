@@ -1,5 +1,5 @@
 import {Collection, MongoDataSource} from 'apollo-datasource-mongodb';
-import {DEFAULT_TTL_SECONDS} from '../consts';
+import {FEED_REFRESH_TTL} from '../consts';
 import {Users} from '../models/users';
 import {Document} from 'mongoose';
 import {ObjectId} from 'mongodb';
@@ -14,10 +14,7 @@ export default class UsersApi extends MongoDataSource<Users> {
     if (!username) {
       throw new Error('Username missing');
     }
-    const users = await this.findByFields(
-      {username},
-      {ttl: DEFAULT_TTL_SECONDS},
-    );
+    const users = await this.findByFields({username}, {ttl: FEED_REFRESH_TTL});
     if (users.length > 1) {
       throw new Error('Multiple users found, uniqueness constraint violated');
     } else if (users.length === 0) {

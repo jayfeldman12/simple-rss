@@ -8,7 +8,7 @@ import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
-import '../styles/Home.module.css';
+import '../styles/Home.module.scss';
 import {FaExternalLinkAlt} from 'react-icons/fa';
 import {graphqlRequest} from '../graphqlRequest';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
@@ -26,7 +26,7 @@ const Home: NextPage = () => {
 
   const [username, setUsername] = useState('');
   const [pauseQueries, setPauseQueries] = useState(true);
-  const [fetchAll, setFetchAll] = useState(true);
+  const [fetchAll, setFetchAll] = useState(false);
   const {
     data: {feeds} = {},
     isFetching,
@@ -65,13 +65,15 @@ const Home: NextPage = () => {
   const onItemClick = useCallback(
     (feedId: string, item: Maybe<FeedItem>) => {
       if (!item) return;
-      markRead(
-        {username, feedId, feedItemId: item.id},
-        {
-          onSuccess: () =>
-            queryClient.invalidateQueries(['getFeeds' + username]),
-        },
-      );
+      if (!item.isRead) {
+        markRead(
+          {username, feedId, feedItemId: item.id},
+          {
+            onSuccess: () =>
+              queryClient.invalidateQueries(['getFeeds' + username]),
+          },
+        );
+      }
       window.open(item.url);
     },
     [markRead, queryClient, username],
@@ -92,9 +94,7 @@ const Home: NextPage = () => {
       </Head>
 
       <main>
-        <div
-          className="container-fluid text-center py-5 px-5 bg-dark text-white height-full vh-100"
-          style={{height: '100%'}}>
+        <div className="container-fluid text-center py-5 px-5 bg-dark text-white height-full vh-100">
           <h1>Welcome to Simple RSS</h1>
           <h2>Username</h2>
           <input
@@ -103,8 +103,7 @@ const Home: NextPage = () => {
             onKeyDown={e => e.key === 'Enter' && setPauseQueries(false)}
           />
           <Button
-            className="col-sm-6 my-4"
-            style={{marginTop: 20}}
+            className="submit-button col-sm-6 my-4"
             onClick={() => setPauseQueries(false)}>
             {isFetching ? (
               <Spinner
@@ -128,16 +127,22 @@ const Home: NextPage = () => {
                 <Col key={item.url}>
                   <Card
                     className="p-3"
-                    border={`${item.isRead ? '' : 'info'}`}
                     style={{borderWidth: '0.3rem', cursor: 'pointer'}}
+                    border={`${item.isRead ? '' : 'info'}`}
                     onClick={() => onItemClick(item.feedId, item)}>
                     {item.feedItemImage?.imgSrc ? (
                       <Card.Img
                         variant="top"
                         src={item.feedItemImage.imgSrc}
-                        style={{maxHeight: '10rem', objectFit: 'cover'}}
+                        style={{
+                          maxHeight: '10rem',
+                          minHeight: '8rem',
+                          objectFit: 'cover',
+                        }}
                       />
-                    ) : null}
+                    ) : (
+                      <div style={{minHeight: '8rem'}} />
+                    )}
                     <Card.Text className="my-2">
                       {item.title?.slice(0, 200)}
                     </Card.Text>
