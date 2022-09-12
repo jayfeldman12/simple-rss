@@ -8,10 +8,10 @@ import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
-import '../styles/Home.module.scss';
 import {FaExternalLinkAlt} from 'react-icons/fa';
 import {graphqlRequest} from '../graphqlRequest';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
+import useWindowDimensions from './utils/useWindowDimensions';
 
 type FeedResponse = {
   feeds: Feed[];
@@ -33,13 +33,14 @@ const Home: NextPage = () => {
     error,
   } = useQuery<FeedResponse, Error>(
     ['getFeeds' + username],
-    () => graphqlRequest(FeedQuery, {username}),
+    () => graphqlRequest(FeedQuery, {username, onlyUnread: !fetchAll}),
     {enabled: !pauseQueries},
   );
   const {data: _markReadResult, mutate: markRead} = useMutation(
     (variables: {username: string; feedId: string; feedItemId: string}) =>
       graphqlRequest(MarkRead, {...variables}),
   );
+  const {height} = useWindowDimensions();
 
   useEffect(() => {
     if (error?.message.includes(NO_USER_FOUND)) {
@@ -94,8 +95,11 @@ const Home: NextPage = () => {
       </Head>
 
       <main>
-        <div className="container-fluid text-center py-5 px-5 bg-dark text-white height-full vh-100">
+        <div
+          className={`container-fluid text-center py-5 px-5 bg-dark text-white height-full`}
+          style={{minHeight: height}}>
           <h1>Welcome to Simple RSS</h1>
+          <div className="test"></div>
           <h2>Username</h2>
           <input
             className="form-control"
@@ -103,7 +107,7 @@ const Home: NextPage = () => {
             onKeyDown={e => e.key === 'Enter' && setPauseQueries(false)}
           />
           <Button
-            className="submit-button col-sm-6 my-4"
+            className="col-sm-6 my-4"
             onClick={() => setPauseQueries(false)}>
             {isFetching ? (
               <Spinner

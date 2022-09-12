@@ -65,7 +65,7 @@ export class FeedApi extends RESTDataSource {
   // Adds a timeout, in ms, that the request will reject if it's not completed in that time
   protected withTimeout = <T extends unknown>(
     request: Promise<T>,
-    timeout = 7000,
+    timeout = 5000,
   ): Promise<T> => {
     let timeoutRef: NodeJS.Timeout;
     return Promise.race([
