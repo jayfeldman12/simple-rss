@@ -11,7 +11,6 @@ import Button from 'react-bootstrap/Button';
 import {FaExternalLinkAlt} from 'react-icons/fa';
 import {graphqlRequest} from '../graphqlRequest';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
-import useWindowDimensions from './utils/useWindowDimensions';
 
 type FeedResponse = {
   feeds: Feed[];
@@ -40,7 +39,11 @@ const Home: NextPage = () => {
     (variables: {username: string; feedId: string; feedItemId: string}) =>
       graphqlRequest(MarkRead, {...variables}),
   );
-  const {height} = useWindowDimensions();
+  const [windowHeight, setWindowHeight] = useState<number | string>('100rem');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') setWindowHeight(window.innerHeight);
+  }, []);
 
   useEffect(() => {
     if (error?.message.includes(NO_USER_FOUND)) {
@@ -97,7 +100,9 @@ const Home: NextPage = () => {
       <main>
         <div
           className={`container-fluid text-center py-5 px-5 bg-dark text-white height-full`}
-          style={{minHeight: height}}>
+          style={{
+            minHeight: windowHeight,
+          }}>
           <h1>Welcome to Simple RSS</h1>
           <div className="test"></div>
           <h2>Username</h2>
