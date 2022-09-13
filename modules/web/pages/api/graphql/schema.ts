@@ -7,24 +7,25 @@ export const typeDefs = gql`
   }
 
   type Mutation {
-    markRead(
-      username: String!
-      feedId: String!
-      feedItemId: String!
-    ): MarkReadResponse
+    markRead(username: String!, feeds: [MarkReadFeed!]!): MarkReadResponse
   }
 
   type MarkReadResponse {
-    success: Boolean!
+    count: Int!
+  }
+
+  input MarkReadFeed {
+    id: String!
+    feedItemIds: [String!]!
   }
 
   "A URL users subscribe to for RSS feeds"
   type Feed {
     description: String
-    feedItems(onlyUnread: Boolean): [FeedItem]
+    feedItems(onlyUnread: Boolean): [FeedItem!]!
     _id: ID!
     "A list of IDs on this feed a user has read. Used to highlight unread items"
-    reads: [ID]
+    reads: [ID!]
     """
     URL of the RRS feed, can be used to get new items. If empty or erroring, this will be fetched from the main URL.
     """

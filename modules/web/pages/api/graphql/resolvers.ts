@@ -1,6 +1,11 @@
 import {Config} from 'apollo-server-nextjs';
 import {FeedApi} from './datasources/feedApi';
-import {Feed, FeedItem} from './models/types';
+import {
+  Feed,
+  FeedItem,
+  MutationMarkReadArgs,
+  QueryFeedsArgs,
+} from './models/types';
 import UsersApi from './datasources/usersApi';
 
 type RequestContext = {
@@ -12,17 +17,21 @@ type RequestContext = {
 
 export const resolvers: Config['resolvers'] = {
   Query: {
-    feeds: async (_parent, args, {dataSources}: RequestContext) => {
+    feeds: async (
+      _parent,
+      args: QueryFeedsArgs,
+      {dataSources}: RequestContext,
+    ) => {
       return (await dataSources.usersApi.getUser(args.username))?.feeds ?? [];
     },
   },
   Mutation: {
-    markRead: async (_parent, args, {dataSources}: RequestContext) => {
-      return dataSources.usersApi.markRead(
-        args.username,
-        args.feedId,
-        args.feedItemId,
-      );
+    markRead: async (
+      _parent,
+      args: MutationMarkReadArgs,
+      {dataSources}: RequestContext,
+    ) => {
+      return dataSources.usersApi.markRead(args);
     },
   },
   Feed: {

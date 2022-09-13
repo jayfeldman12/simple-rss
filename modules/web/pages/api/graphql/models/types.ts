@@ -33,23 +33,27 @@ export type Mutation = {
 
 export type MutationMarkReadArgs = {
   username: Scalars['String'];
-  feedId: Scalars['String'];
-  feedItemId: Scalars['String'];
+  feeds: Array<MarkReadFeed>;
 };
 
 export type MarkReadResponse = {
   __typename?: 'MarkReadResponse';
-  success: Scalars['Boolean'];
+  count: Scalars['Int'];
+};
+
+export type MarkReadFeed = {
+  id: Scalars['String'];
+  feedItemIds: Array<Scalars['String']>;
 };
 
 /** A URL users subscribe to for RSS feeds */
 export type Feed = {
   __typename?: 'Feed';
   description?: Maybe<Scalars['String']>;
-  feedItems?: Maybe<Array<Maybe<FeedItem>>>;
+  feedItems: Array<FeedItem>;
   _id: Scalars['ID'];
   /** A list of IDs on this feed a user has read. Used to highlight unread items */
-  reads?: Maybe<Array<Maybe<Scalars['ID']>>>;
+  reads?: Maybe<Array<Scalars['ID']>>;
   /** URL of the RRS feed, can be used to get new items. If empty or erroring, this will be fetched from the main URL. */
   rssUrl: Scalars['String'];
   title?: Maybe<Scalars['String']>;
@@ -71,5 +75,5 @@ export type FeedItem = {
   title?: Maybe<Scalars['String']>;
   url: Scalars['String'];
   isRead: Scalars['Boolean'];
-  image: Maybe<Scalars['String']>;
+  image?: Maybe<Scalars['String']>;
 };

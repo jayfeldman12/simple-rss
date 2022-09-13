@@ -24,13 +24,9 @@ export const FeedQuery = gql`
 `;
 
 export const MarkRead = gql`
-  mutation MarkRead(
-    $username: String!
-    $feedId: String!
-    $feedItemId: String!
-  ) {
-    markRead(username: $username, feedId: $feedId, feedItemId: $feedItemId) {
-      success
+  mutation MarkRead($username: String!, $feeds: [MarkReadFeed!]!) {
+    markRead(username: $username, feeds: $feeds) {
+      count
     }
   }
 `;

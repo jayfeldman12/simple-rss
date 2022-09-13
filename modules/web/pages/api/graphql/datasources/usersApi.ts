@@ -3,7 +3,12 @@ import {FEED_REFRESH_TTL} from '../consts';
 import {Users} from '../models/users';
 import {Document} from 'mongoose';
 import {ObjectId} from 'mongodb';
-import {Feed} from '../models/types';
+import {
+  Feed,
+  MarkReadFeed,
+  MarkReadResponse,
+  MutationMarkReadArgs,
+} from '../models/types';
 import {FeedApi} from './feedApi';
 
 export default class UsersApi extends MongoDataSource<Users> {
@@ -23,20 +28,37 @@ export default class UsersApi extends MongoDataSource<Users> {
     return users[0];
   }
 
-  public markRead = async (
+  public markRead = async ({
+    username,
+    feeds,
+  }: MutationMarkReadArgs): Promise<MarkReadResponse> => {
+    try {
+      const count = await feeds.reduce<Promise<number>>(
+        async (addCount, feed) =>
+          (await addCount) +
+          (await this.markFeedItemsRead(username, feed.id, feed.feedItemIds)),
+        new Promise(res => res(0)),
+      );
+      await this.deleteFromCacheByFields({username});
+      return {count};
+    } catch {
+      return {count: 0};
+    }
+  };
+
+  public markFeedItemsRead = async (
     username: string,
     feedId: string,
-    feedItemId: string,
-  ): Promise<{success: boolean}> => {
+    feedItemIds: string[],
+  ): Promise<number> => {
     try {
       const response = await this.collection.updateOne(
         {username, 'feeds._id': new ObjectId(feedId)},
-        {$addToSet: {'feeds.$.reads': feedItemId}},
+        {$addToSet: {'feeds.$.reads': {$each: [...feedItemIds]}}},
       );
-      await this.deleteFromCacheByFields({username});
-      return {success: response.modifiedCount > 0};
+      return response.modifiedCount;
     } catch {
-      return {success: false};
+      return 0;
     }
   };
 
