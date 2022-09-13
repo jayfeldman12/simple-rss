@@ -4,7 +4,7 @@ import {
   FeedItem,
   Maybe,
   MutationMarkReadArgs,
-} from './api/graphql/models/types';
+} from '../pages/api/graphql/models/types';
 import {FeedQuery, MarkRead} from '../queries/feedQuery';
 import {graphqlRequest} from '../graphqlRequest';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
