@@ -13,7 +13,7 @@ export class FeedApi extends RESTDataSource {
   }
 
   public getItemsFromFeed = async (
-    {rssUrl, reads}: Feed,
+    {rssUrl, reads, _id: feedId}: Feed,
     onlyUnread?: boolean,
   ): Promise<(FeedItem | undefined)[]> => {
     const response = await this.withTimeout(
@@ -42,13 +42,14 @@ export class FeedApi extends RESTDataSource {
       const isRead = reads?.includes(id) ?? false;
       if (onlyUnread && isRead) return undefined;
       return {
-        title: item.title,
-        description: item.contentSnippet,
-        url: item.link ?? '',
         date: item.isoDate ?? '',
+        description: item.contentSnippet,
+        feedId: feedId,
         id,
-        isRead,
         image: image ?? '',
+        isRead,
+        title: item.title,
+        url: item.link ?? '',
       };
     });
   };

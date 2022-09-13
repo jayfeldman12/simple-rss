@@ -71,6 +71,7 @@ export type FeedItem = {
   __typename?: 'FeedItem';
   date: Scalars['String'];
   description?: Maybe<Scalars['String']>;
+  feedId: Scalars['String'];
   id: Scalars['ID'];
   title?: Maybe<Scalars['String']>;
   url: Scalars['String'];

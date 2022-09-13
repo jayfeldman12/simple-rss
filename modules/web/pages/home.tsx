@@ -1,118 +1,33 @@
 import type {NextPage} from 'next';
 import Head from 'next/head';
-import {useCallback, useEffect, useMemo, useState} from 'react';
-import {
-  Feed,
-  FeedItem,
-  Maybe,
-  MutationMarkReadArgs,
-} from './api/graphql/models/types';
-import {FeedQuery, MarkRead} from '../queries/feedQuery';
+import {useEffect, useState} from 'react';
 import Spinner from 'react-bootstrap/Spinner';
 import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import {FaExternalLinkAlt} from 'react-icons/fa';
-import {graphqlRequest} from '../graphqlRequest';
-import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
-
-type FeedResponse = {
-  feeds: Feed[];
-};
-
-type ItemWithFeedId = FeedItem & {feedId: string};
-
-const NO_USER_FOUND = 'No user found';
+import {useFeeds} from './useFeeds';
 
 const Home: NextPage = () => {
-  const queryClient = useQueryClient();
-
-  const [username, setUsername] = useState('');
-  const [pauseQueries, setPauseQueries] = useState(true);
-  const [fetchAll, setFetchAll] = useState(false);
   const {
-    data: {feeds} = {},
+    errorMessage,
     isFetching,
-    error,
-  } = useQuery<FeedResponse, Error>(
-    ['getFeeds' + username],
-    () => graphqlRequest(FeedQuery, {username, onlyUnread: !fetchAll}),
-    {enabled: !pauseQueries},
-  );
-  const {data: _markReadResult, mutate: markRead} = useMutation(
-    (variables: MutationMarkReadArgs) =>
-      graphqlRequest(MarkRead, {...variables}),
-  );
+    items,
+    markAllRead,
+    onItemClick,
+    setFetchAll,
+    setPauseQueries,
+    setUsername,
+    showFetchAll,
+    showMarkAllRead,
+    unreadCount,
+  } = useFeeds();
   const [windowHeight, setWindowHeight] = useState<number | string>('100rem');
 
   useEffect(() => {
     if (typeof window !== 'undefined') setWindowHeight(window.innerHeight);
   }, []);
-
-  useEffect(() => {
-    if (error?.message.includes(NO_USER_FOUND)) {
-      setPauseQueries(true);
-    }
-  }, [error?.message]);
-
-  const items = useMemo(() => {
-    if (feeds) {
-      const results = feeds
-        .flatMap<Partial<ItemWithFeedId> | undefined>(feed =>
-          feed.feedItems?.map(item => ({...item, feedId: feed._id})),
-        )
-        .filter(x => x) as ItemWithFeedId[];
-      const sorted = results.sort(
-        (a, b) => new Date(b.date).valueOf() - new Date(a.date).valueOf(),
-      );
-      return sorted;
-    }
-    return null;
-  }, [feeds]);
-
-  const invalidateFeeds = useCallback(
-    () => queryClient.invalidateQueries(['getFeeds' + username]),
-    [queryClient, username],
-  );
-
-  const onItemClick = useCallback(
-    (feedId: string, item: Maybe<FeedItem>) => {
-      if (!item) return;
-      if (!item.isRead) {
-        markRead(
-          {username, feeds: [{id: feedId, feedItemIds: [item.id]}]},
-          {
-            onSuccess: invalidateFeeds,
-          },
-        );
-      }
-      window.open(item.url);
-    },
-    [invalidateFeeds, markRead, username],
-  );
-
-  const markAllRead = useCallback(() => {
-    const request: MutationMarkReadArgs = {
-      username,
-      feeds:
-        feeds?.map(feed => ({
-          id: feed._id,
-          feedItemIds: feed.feedItems?.map(item => item.id) ?? [],
-        })) ?? [],
-    };
-    markRead(request, {onSuccess: invalidateFeeds});
-  }, [feeds, invalidateFeeds, markRead, username]);
-
-  const unreadCount = useMemo(
-    () =>
-      items?.reduce((acc, nextItem) => (nextItem.isRead ? acc : acc + 1), 0),
-    [items],
-  );
-
-  const haveUnreads = useMemo(() => {
-    return (!fetchAll && items?.length) || items?.find(item => !item.isRead);
-  }, [fetchAll, items]);
 
   return (
     <div>
@@ -152,9 +67,7 @@ const Home: NextPage = () => {
               'Submit'
             )}
           </Button>
-          {!isFetching && error?.message.includes(NO_USER_FOUND) ? (
-            <p>Invalid username</p>
-          ) : null}
+          {errorMessage ? <p>{errorMessage}</p> : null}
           <Row xs={1} md={2} lg={3} xl={4} className="g-4 text-dark">
             {items?.map(item => {
               return (
@@ -193,14 +106,14 @@ const Home: NextPage = () => {
               );
             })}
           </Row>
-          {!feeds || fetchAll ? null : (
+          {showFetchAll ? null : (
             <Button className="col-sm-2 my-5" onClick={() => setFetchAll(true)}>
               Fetch all items
             </Button>
           )}
           <div />
-          {haveUnreads ? (
-            <Button className="col-sm-2" onClick={() => markAllRead()}>
+          {showMarkAllRead ? (
+            <Button className="col-sm-2" onClick={markAllRead}>
               Mark all read
             </Button>
           ) : null}
