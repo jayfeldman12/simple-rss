@@ -1,7 +1,7 @@
 import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import {FaExternalLinkAlt} from 'react-icons/fa';
-import {FeedItem} from '../api/graphql/models/types';
+import {FeedItem} from '../../pages/api/graphql/models/types';
 
 interface FeedCardProps {
   item: FeedItem;
@@ -14,7 +14,7 @@ const FeedCard = ({item, onItemClick}: FeedCardProps) => {
       <Card
         className="p-3"
         style={{borderWidth: '0.3rem', cursor: 'pointer'}}
-        border={`${item?.isRead ? '' : 'info'}`}
+        border={`${item.isRead ? '' : 'info'}`}
         onClick={() => onItemClick(item)}>
         {item.image ? (
           <Card.Img

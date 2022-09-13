@@ -4,8 +4,8 @@ import {useEffect, useState} from 'react';
 import Row from 'react-bootstrap/Row';
 import Button from 'react-bootstrap/Button';
 import {useFeeds} from '../hooks/useFeeds';
-import FeedCard from './homeComponents/feedCard';
-import SubmitButton from '../common/SubmitButton';
+import FeedCard from '../components/homeComponents/feedCard';
+import SubmitButton from '../components/common/SubmitButton';
 
 const Home: NextPage = () => {
   const {
