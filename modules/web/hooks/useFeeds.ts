@@ -26,7 +26,7 @@ export const useFeeds = () => {
     isFetching,
     error,
   } = useQuery<FeedResponse, Error>(
-    ['getFeeds' + username],
+    ['getFeeds' + username + !fetchAll],
     () => graphqlRequest(FeedQuery, {username, onlyUnread: !fetchAll}),
     {enabled: !pauseQueries},
   );
@@ -55,8 +55,8 @@ export const useFeeds = () => {
   }, [feeds]);
 
   const invalidateFeeds = useCallback(
-    () => queryClient.invalidateQueries(['getFeeds' + username]),
-    [queryClient, username],
+    () => queryClient.invalidateQueries(['getFeeds' + username + !fetchAll]),
+    [fetchAll, queryClient, username],
   );
 
   const onItemClick = (item: FeedItem) => {
