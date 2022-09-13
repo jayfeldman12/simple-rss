@@ -14,7 +14,7 @@ const FeedCard = ({item, onItemClick}: FeedCardProps) => {
       <Card
         className="p-3"
         style={{borderWidth: '0.3rem', cursor: 'pointer'}}
-        border={`${item.isRead ? '' : 'info'}`}
+        border={`${item?.isRead ? '' : 'info'}`}
         onClick={() => onItemClick(item)}>
         {item.image ? (
           <Card.Img
