@@ -2,12 +2,12 @@ import {useCallback, useMemo, useState} from 'react';
 import {
   Feed,
   FeedItem,
-  Maybe,
   MutationMarkReadArgs,
 } from '../pages/api/graphql/models/types';
 import {FeedQuery, MarkRead} from '../queries/feedQuery';
 import {graphqlRequest} from '../graphqlRequest';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
+import {APP_FEED_REFRESH_TIME} from '../utils/consts';
 
 type FeedResponse = {
   feeds: Feed[];
@@ -28,7 +28,11 @@ export const useFeeds = () => {
   } = useQuery<FeedResponse, Error>(
     ['getFeeds' + username + !fetchAll],
     () => graphqlRequest(FeedQuery, {username, onlyUnread: !fetchAll}),
-    {enabled: !pauseQueries},
+    {
+      enabled: !pauseQueries,
+      refetchInterval: APP_FEED_REFRESH_TIME + 10, // make sure it's not marked as stale
+      refetchIntervalInBackground: true,
+    },
   );
   const {mutate: markRead} = useMutation((variables: MutationMarkReadArgs) =>
     graphqlRequest(MarkRead, {...variables}),

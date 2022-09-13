@@ -3,13 +3,14 @@ import Head from 'next/head';
 import '../styles/custom.scss';
 import '../styles/globals.css';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {APP_FEED_REFRESH_TIME} from '../utils/consts';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
       retryDelay: failureCount => (failureCount + 1) * 500,
-      staleTime: 1000 * 60 * 19, // 21 minutes
+      staleTime: APP_FEED_REFRESH_TIME,
     },
   },
 });
