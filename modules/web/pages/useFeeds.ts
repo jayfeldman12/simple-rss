@@ -59,10 +59,10 @@ export const useFeeds = () => {
     [queryClient, username],
   );
 
-  const onItemClick = (feedId: string, item: FeedItem) => {
+  const onItemClick = (item: FeedItem) => {
     if (!item.isRead) {
       markRead(
-        {username, feeds: [{id: feedId, feedItemIds: [item.id]}]},
+        {username, feeds: [{id: item.feedId, feedItemIds: [item.id]}]},
         {onSuccess: invalidateFeeds},
       );
     }

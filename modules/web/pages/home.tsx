@@ -1,13 +1,11 @@
 import type {NextPage} from 'next';
 import Head from 'next/head';
 import {useEffect, useState} from 'react';
-import Spinner from 'react-bootstrap/Spinner';
-import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
-import {FaExternalLinkAlt} from 'react-icons/fa';
 import {useFeeds} from './useFeeds';
+import FeedCard from './homeComponents/feedCard';
+import SubmitButton from '../common/SubmitButton';
 
 const Home: NextPage = () => {
   const {
@@ -51,70 +49,28 @@ const Home: NextPage = () => {
             onChange={event => setUsername(event.target.value)}
             onKeyDown={e => e.key === 'Enter' && setPauseQueries(false)}
           />
-          <Button
+          <SubmitButton
             className="col-sm-6 my-4"
+            isLoading={isFetching}
             onClick={() => setPauseQueries(false)}>
-            {isFetching ? (
-              <Spinner
-                as="span"
-                variant="light"
-                size="sm"
-                role="status"
-                aria-hidden="true"
-                animation="border"
-              />
-            ) : (
-              'Submit'
-            )}
-          </Button>
+            Submit
+          </SubmitButton>
+
           {errorMessage ? <p>{errorMessage}</p> : null}
           <Row xs={1} md={2} lg={3} xl={4} className="g-4 text-dark">
-            {items?.map(item => {
-              return (
-                <Col key={item.url}>
-                  <Card
-                    className="p-3"
-                    style={{borderWidth: '0.3rem', cursor: 'pointer'}}
-                    border={`${item.isRead ? '' : 'info'}`}
-                    onClick={() => onItemClick(item.feedId, item)}>
-                    {item.image ? (
-                      <Card.Img
-                        variant="top"
-                        src={item.image}
-                        style={{
-                          maxHeight: '10rem',
-                          minHeight: '8rem',
-                          objectFit: 'cover',
-                        }}
-                      />
-                    ) : (
-                      <div style={{minHeight: '8rem'}} />
-                    )}
-                    <Card.Text className="my-2">
-                      {item.title?.slice(0, 200)}
-                    </Card.Text>
-                    <Card.Subtitle className="text-secondary small my-1">
-                      {item.description?.slice(0, 200)}
-                    </Card.Subtitle>
-                    <Card.Footer>
-                      <a href={item.url}>
-                        <FaExternalLinkAlt />
-                      </a>
-                    </Card.Footer>
-                  </Card>
-                </Col>
-              );
-            })}
+            {items?.map(item => (
+              <FeedCard key={item.id} item={item} onItemClick={onItemClick} />
+            ))}
           </Row>
-          {showFetchAll ? null : (
-            <Button className="col-sm-2 my-5" onClick={() => setFetchAll(true)}>
-              Fetch all items
+          {showFetchAll ? (
+            <Button className="col-sm-2 my-3" onClick={() => setFetchAll(true)}>
+              Get all items
             </Button>
-          )}
+          ) : null}
           <div />
           {showMarkAllRead ? (
-            <Button className="col-sm-2" onClick={markAllRead}>
-              Mark all read
+            <Button className="col-sm-2 my-3" onClick={markAllRead}>
+              Mark all as read
             </Button>
           ) : null}
         </div>
