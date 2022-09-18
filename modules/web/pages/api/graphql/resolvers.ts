@@ -3,12 +3,14 @@ import {FeedApi} from './datasources/feedApi';
 import {
   Feed,
   FeedItem,
+  MutationLoginArgs,
   MutationMarkReadArgs,
   QueryFeedsArgs,
 } from './models/types';
 import UsersApi from './datasources/usersApi';
+import {JWTToken} from './models/jwtToken';
 
-type RequestContext = {
+type RequestContext = JWTToken & {
   dataSources: {
     feedApi: FeedApi;
     usersApi: UsersApi;
@@ -26,7 +28,17 @@ export const resolvers: Config['resolvers'] = {
     },
   },
   Mutation: {
-    markRead: async (
+    createUser: (
+      _parent,
+      {username, password}: MutationLoginArgs,
+      {dataSources}: RequestContext,
+    ) => dataSources.usersApi.createUser(username, password),
+    login: (
+      _parent,
+      {username, password}: MutationLoginArgs,
+      {dataSources}: RequestContext,
+    ) => dataSources.usersApi.login(username, password),
+    markRead: (
       _parent,
       args: MutationMarkReadArgs,
       {dataSources}: RequestContext,

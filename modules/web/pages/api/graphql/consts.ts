@@ -1,1 +1,1 @@
-export const FEED_REFRESH_TTL = 20 * 60; // 20 minutes
+export const FEED_REFRESH_TTL = 19 * 60; // 19 minutes

@@ -4,10 +4,7 @@ export const FeedQuery = gql`
   query FeedQuery($username: String!, $onlyUnread: Boolean) {
     feeds(username: $username) {
       _id
-      description
-      rssUrl
       title
-      url
       feedItems(onlyUnread: $onlyUnread) {
         date
         description

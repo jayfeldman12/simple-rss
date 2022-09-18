@@ -7,7 +7,18 @@ export const typeDefs = gql`
   }
 
   type Mutation {
+    createUser(username: String!, password: String!): CreateUserResponse
+    login(username: String!, password: String!): LoginResponse
     markRead(username: String!, feeds: [MarkReadFeed!]!): MarkReadResponse
+  }
+
+  type CreateUserResponse {
+    token: String!
+    id: String!
+  }
+
+  type LoginResponse {
+    token: String!
   }
 
   type MarkReadResponse {

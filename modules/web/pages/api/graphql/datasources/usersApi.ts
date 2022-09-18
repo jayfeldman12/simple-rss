@@ -1,17 +1,20 @@
 import {Collection, MongoDataSource} from 'apollo-datasource-mongodb';
-import {FEED_REFRESH_TTL} from '../consts';
-import {Users} from '../models/users';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import {Document} from 'mongoose';
 import {ObjectId} from 'mongodb';
+import {FEED_REFRESH_TTL} from '../consts';
+import {User} from '../models/users';
 import {
+  CreateUserResponse,
   Feed,
-  MarkReadFeed,
+  LoginResponse,
   MarkReadResponse,
   MutationMarkReadArgs,
 } from '../models/types';
 import {FeedApi} from './feedApi';
 
-export default class UsersApi extends MongoDataSource<Users> {
+export default class UsersApi extends MongoDataSource<User> {
   // @ts-expect-error not uninitialized, it's assigned in the super
   protected collection: Collection<Document>;
 
@@ -26,6 +29,49 @@ export default class UsersApi extends MongoDataSource<Users> {
       throw new Error('No user found');
     }
     return users[0];
+  }
+
+  public async createUser(
+    username: string,
+    password: string,
+  ): Promise<CreateUserResponse> {
+    if (!username || !password) {
+      throw new Error('Username and password required');
+    }
+    if (password.length < 8 || !password.match(/^(?=.*[a-zA-Z])(?=.*[0-9])/)) {
+      throw new Error('Password must be 8 chars and have letters and numbers');
+    }
+    const alreadyExists = await this.collection.findOne({username});
+    if (alreadyExists) {
+      throw new Error('Username taken');
+    }
+    const hash = await bcrypt.hashSync(password);
+    const {insertedId} = await this.collection.insertOne({
+      username,
+      password: hash,
+      feeds: [],
+    });
+    return {
+      id: insertedId.toHexString(),
+      token: (await this.login(username, password)).token,
+    };
+  }
+
+  public async login(
+    username: string,
+    password: string,
+  ): Promise<LoginResponse> {
+    const INVALID_CREDENTIALS = 'Invalid credentials';
+    const user = await this.collection.findOne<User>({username});
+    if (!user) {
+      throw new Error(INVALID_CREDENTIALS);
+    }
+    const correctPassword = await bcrypt.compareSync(password, user.password);
+    if (!correctPassword) {
+      throw new Error(INVALID_CREDENTIALS);
+    }
+    const token = jwt.sign({id: user._id}, process.env.JWT_SIGNING!);
+    return {token};
   }
 
   public markRead = async ({
