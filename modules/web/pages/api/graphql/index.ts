@@ -40,10 +40,15 @@ const server = new ApolloServer({
     if (PUBLIC_ENDPOINTS.includes(endpoint)) return;
 
     const token = req.headers.authorization ?? '';
-    const rawToken = jwt.verify(token, process.env.JWT_SIGNING!) as JWTToken;
-    if (!rawToken) {
-      throw new AuthenticationError('Unauthorized');
+    let rawToken: JWTToken;
+    try {
+      rawToken = jwt.verify(token, process.env.JWT_SIGNING!) as JWTToken;
+    } finally {
+      if (!rawToken?.id) {
+        throw new AuthenticationError('Unauthorized');
+      }
     }
+
     return rawToken;
   },
   plugins: [logger],
