@@ -1,1 +1,3 @@
-export type JWTToken = {id: string} | undefined;
+import {ObjectId} from 'mongodb';
+
+export type JWTToken = {userId: ObjectId} | undefined;

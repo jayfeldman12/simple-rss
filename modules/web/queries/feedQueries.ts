@@ -1,8 +1,8 @@
 import {gql} from 'graphql-request';
 
 export const FeedQuery = gql`
-  query FeedQuery($username: String!, $onlyUnread: Boolean) {
-    feeds(username: $username) {
+  query FeedQuery($onlyUnread: Boolean) {
+    feeds {
       _id
       title
       feedItems(onlyUnread: $onlyUnread) {
@@ -20,8 +20,8 @@ export const FeedQuery = gql`
 `;
 
 export const MarkRead = gql`
-  mutation MarkRead($username: String!, $feeds: [MarkReadFeed!]!) {
-    markRead(username: $username, feeds: $feeds) {
+  mutation MarkRead($feeds: [MarkReadFeed!]!) {
+    markRead(feeds: $feeds) {
       count
     }
   }

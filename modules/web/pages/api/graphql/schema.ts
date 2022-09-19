@@ -3,13 +3,13 @@ import {gql} from 'apollo-server-nextjs';
 export const typeDefs = gql`
   type Query {
     "Get all fields user has subscribed to"
-    feeds(username: String!): [Feed]
+    feeds: [Feed]
   }
 
   type Mutation {
     createUser(username: String!, password: String!): CreateUserResponse
     login(username: String!, password: String!): LoginResponse
-    markRead(username: String!, feeds: [MarkReadFeed!]!): MarkReadResponse
+    markRead(feeds: [MarkReadFeed!]!): MarkReadResponse
   }
 
   type CreateUserResponse {

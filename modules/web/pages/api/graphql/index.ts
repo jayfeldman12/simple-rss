@@ -4,7 +4,7 @@ import {typeDefs} from './schema';
 import {resolvers} from './resolvers';
 import {FeedApi} from './datasources/feedApi';
 import {logger} from './logger';
-import {Logger, MongoClient} from 'mongodb';
+import {Logger, MongoClient, ObjectId} from 'mongodb';
 import UsersApi from './datasources/usersApi';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
@@ -32,24 +32,26 @@ const server = new ApolloServer({
       usersApi: new UsersApi(mongoClient.db().collection('users')),
     };
   },
-  context: ({req}) => {
+  context: ({req}): JWTToken => {
     const gql = parseGraphql(req.body?.query);
     // Types are wrong on this
-    const endpoint = (gql.definitions[0] as any).selectionSet.selections[0].name
-      .value;
-    if (PUBLIC_ENDPOINTS.includes(endpoint)) return;
+    const endpointName = (gql.definitions[0] as any).selectionSet.selections[0]
+      .name.value;
+    if (PUBLIC_ENDPOINTS.includes(endpointName)) return;
 
-    const token = req.headers.authorization ?? '';
+    const token = req.headers.authorization?.split('Bearer ')[1] ?? '';
     let rawToken: JWTToken;
+    console.log('token', token);
     try {
       rawToken = jwt.verify(token, process.env.JWT_SIGNING!) as JWTToken;
+      console.log('row', rawToken);
     } finally {
-      if (!rawToken?.id) {
+      if (!rawToken?.userId) {
         throw new AuthenticationError('Unauthorized');
       }
     }
 
-    return rawToken;
+    return {userId: new ObjectId(rawToken.userId)};
   },
   plugins: [logger],
 });

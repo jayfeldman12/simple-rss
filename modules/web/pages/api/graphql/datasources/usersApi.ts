@@ -3,8 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import {Document} from 'mongoose';
 import {ObjectId} from 'mongodb';
-import {FEED_REFRESH_TTL} from '../consts';
-import {User} from '../models/users';
+import {User, WithUserId} from '../models/users';
 import {
   CreateUserResponse,
   Feed,
@@ -15,20 +14,13 @@ import {
 import {FeedApi} from './feedApi';
 
 export default class UsersApi extends MongoDataSource<User> {
+  protected INVALID_CREDENTIALS = 'Invalid credentials';
+
   // @ts-expect-error not uninitialized, it's assigned in the super
   protected collection: Collection<Document>;
 
-  public async getUser(username: string) {
-    if (!username) {
-      throw new Error('Username missing');
-    }
-    const users = await this.findByFields({username}, {ttl: FEED_REFRESH_TTL});
-    if (users.length > 1) {
-      throw new Error('Multiple users found, uniqueness constraint violated');
-    } else if (users.length === 0) {
-      throw new Error('No user found');
-    }
-    return users[0];
+  public async getUser(userId: ObjectId) {
+    return this.findOneById(userId);
   }
 
   public async createUser(
@@ -45,15 +37,17 @@ export default class UsersApi extends MongoDataSource<User> {
     if (alreadyExists) {
       throw new Error('Username taken');
     }
+
     const hash = await bcrypt.hashSync(password);
     const {insertedId} = await this.collection.insertOne({
       username,
       password: hash,
       feeds: [],
     });
+    const id = insertedId.toHexString();
     return {
-      id: insertedId.toHexString(),
-      token: (await this.login(username, password)).token,
+      id,
+      token: this.generateToken(id),
     };
   }
 
@@ -61,31 +55,33 @@ export default class UsersApi extends MongoDataSource<User> {
     username: string,
     password: string,
   ): Promise<LoginResponse> {
-    const INVALID_CREDENTIALS = 'Invalid credentials';
     const user = await this.collection.findOne<User>({username});
     if (!user) {
-      throw new Error(INVALID_CREDENTIALS);
+      throw new Error(this.INVALID_CREDENTIALS);
     }
     const correctPassword = await bcrypt.compareSync(password, user.password);
     if (!correctPassword) {
-      throw new Error(INVALID_CREDENTIALS);
+      throw new Error(this.INVALID_CREDENTIALS);
     }
-    const token = jwt.sign({id: user._id}, process.env.JWT_SIGNING!);
-    return {token};
+    return {token: this.generateToken(user._id)};
   }
 
+  protected generateToken = (userId: string): string => {
+    return jwt.sign({userId}, process.env.JWT_SIGNING!);
+  };
+
   public markRead = async ({
-    username,
+    userId,
     feeds,
-  }: MutationMarkReadArgs): Promise<MarkReadResponse> => {
+  }: WithUserId<MutationMarkReadArgs>): Promise<MarkReadResponse> => {
     try {
       const count = await feeds.reduce<Promise<number>>(
         async (addCount, feed) =>
           (await addCount) +
-          (await this.markFeedItemsRead(username, feed.id, feed.feedItemIds)),
+          (await this.markFeedItemsRead(userId, feed.id, feed.feedItemIds)),
         new Promise(res => res(0)),
       );
-      await this.deleteFromCacheByFields({username});
+      await this.deleteFromCacheByFields({userId});
       return {count};
     } catch {
       return {count: 0};
@@ -93,13 +89,13 @@ export default class UsersApi extends MongoDataSource<User> {
   };
 
   public markFeedItemsRead = async (
-    username: string,
+    userId: ObjectId,
     feedId: string,
     feedItemIds: string[],
   ): Promise<number> => {
     try {
       const response = await this.collection.updateOne(
-        {username, 'feeds._id': new ObjectId(feedId)},
+        {_id: userId, 'feeds._id': new ObjectId(feedId)},
         {$addToSet: {'feeds.$.reads': {$each: [...feedItemIds]}}},
       );
       return response.modifiedCount;

@@ -5,7 +5,6 @@ import {
   FeedItem,
   MutationLoginArgs,
   MutationMarkReadArgs,
-  QueryFeedsArgs,
 } from './models/types';
 import UsersApi from './datasources/usersApi';
 import {JWTToken} from './models/jwtToken';
@@ -21,10 +20,10 @@ export const resolvers: Config['resolvers'] = {
   Query: {
     feeds: async (
       _parent,
-      args: QueryFeedsArgs,
-      {dataSources}: RequestContext,
+      _args,
+      {userId: id, dataSources}: RequestContext,
     ) => {
-      return (await dataSources.usersApi.getUser(args.username))?.feeds ?? [];
+      return (await dataSources.usersApi.getUser(id))?.feeds ?? [];
     },
   },
   Mutation: {
@@ -41,9 +40,9 @@ export const resolvers: Config['resolvers'] = {
     markRead: (
       _parent,
       args: MutationMarkReadArgs,
-      {dataSources}: RequestContext,
+      {userId: id, dataSources}: RequestContext,
     ) => {
-      return dataSources.usersApi.markRead(args);
+      return dataSources.usersApi.markRead({...args, userId: id});
     },
   },
   Feed: {

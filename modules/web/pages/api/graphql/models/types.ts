@@ -22,10 +22,6 @@ export type Query = {
   feeds?: Maybe<Array<Maybe<Feed>>>;
 };
 
-export type QueryFeedsArgs = {
-  username: Scalars['String'];
-};
-
 export type Mutation = {
   __typename?: 'Mutation';
   createUser?: Maybe<CreateUserResponse>;
@@ -44,7 +40,6 @@ export type MutationLoginArgs = {
 };
 
 export type MutationMarkReadArgs = {
-  username: Scalars['String'];
   feeds: Array<MarkReadFeed>;
 };
 

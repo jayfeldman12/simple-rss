@@ -4,32 +4,30 @@ import {
   FeedItem,
   MutationMarkReadArgs,
 } from '../pages/api/graphql/models/types';
-import {FeedQuery, MarkRead} from '../queries/feedQuery';
+import {FeedQuery, MarkRead} from '../queries/feedQueries';
 import {graphqlRequest} from '../graphqlRequest';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {APP_FEED_REFRESH_TIME} from '../utils/consts';
+import {TOKEN_LOCAL_STORAGE} from '../pages/api/graphql/consts';
 
 type FeedResponse = {
   feeds: Feed[];
 };
 
-const NO_USER_FOUND = 'No user found';
-
 export const useFeeds = () => {
+  const token = localStorage.getItem(TOKEN_LOCAL_STORAGE);
   const queryClient = useQueryClient();
-  const [username, setUsername] = useState('');
-  const [pauseQueries, setPauseQueries] = useState(true);
   const [fetchAll, setFetchAll] = useState(false);
 
   const {
     data: {feeds} = {},
+    isSuccess,
     isFetching,
     error,
   } = useQuery<FeedResponse, Error>(
-    ['getFeeds' + username + !fetchAll],
-    () => graphqlRequest(FeedQuery, {username, onlyUnread: !fetchAll}),
+    ['getFeeds' + token + !fetchAll],
+    () => graphqlRequest(FeedQuery, {onlyUnread: !fetchAll}),
     {
-      enabled: !pauseQueries,
       refetchInterval: APP_FEED_REFRESH_TIME + 10, // make sure it's not marked as stale
       refetchIntervalInBackground: true,
     },
@@ -41,10 +39,6 @@ export const useFeeds = () => {
   const errorMessage = useMemo(() => {
     if (!error || isFetching) {
       return '';
-    }
-    setPauseQueries(true);
-    if (error.message.includes(NO_USER_FOUND)) {
-      return 'Invalid username';
     }
   }, [error, isFetching]);
 
@@ -59,14 +53,14 @@ export const useFeeds = () => {
   }, [feeds]);
 
   const invalidateFeeds = useCallback(
-    () => queryClient.invalidateQueries(['getFeeds' + username + !fetchAll]),
-    [fetchAll, queryClient, username],
+    () => queryClient.invalidateQueries(['getFeeds' + token + !fetchAll]),
+    [fetchAll, queryClient, token],
   );
 
   const onItemClick = (item: FeedItem) => {
     if (!item.isRead) {
       markRead(
-        {username, feeds: [{id: item.feedId, feedItemIds: [item.id]}]},
+        {feeds: [{id: item.feedId, feedItemIds: [item.id]}]},
         {onSuccess: invalidateFeeds},
       );
     }
@@ -76,14 +70,13 @@ export const useFeeds = () => {
   const markAllRead = useCallback(() => {
     if (!feeds) return;
     const request: MutationMarkReadArgs = {
-      username,
       feeds: feeds.map(feed => ({
         id: feed._id,
         feedItemIds: feed.feedItems.map(item => item.id),
       })),
     };
     markRead(request, {onSuccess: invalidateFeeds});
-  }, [feeds, invalidateFeeds, markRead, username]);
+  }, [feeds, invalidateFeeds, markRead]);
 
   const unreadCount = useMemo(
     () =>
@@ -98,13 +91,12 @@ export const useFeeds = () => {
   return {
     errorMessage,
     fetchAll,
+    hasFetched: isSuccess,
     isFetching,
     items,
     markAllRead,
     onItemClick,
     setFetchAll,
-    setPauseQueries,
-    setUsername,
     showFetchAll: !fetchAll && feeds,
     showMarkAllRead: haveUnreads,
     unreadCount,

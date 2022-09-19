@@ -1,3 +1,4 @@
+import {ObjectId} from 'mongodb';
 import {Feed} from './types';
 
 export interface User {
@@ -6,3 +7,7 @@ export interface User {
   password: string;
   feeds: Feed[];
 }
+
+export type WithUserId<T> = T & {
+  userId: ObjectId;
+};
