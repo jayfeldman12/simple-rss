@@ -26,6 +26,8 @@ export type Mutation = {
   __typename?: 'Mutation';
   createUser?: Maybe<CreateUserResponse>;
   login?: Maybe<LoginResponse>;
+  addFeed?: Maybe<AddFeedResponse>;
+  deleteFeed?: Maybe<DeleteFeedResponse>;
   markRead?: Maybe<MarkReadResponse>;
 };
 
@@ -37,6 +39,15 @@ export type MutationCreateUserArgs = {
 export type MutationLoginArgs = {
   username: Scalars['String'];
   password: Scalars['String'];
+};
+
+export type MutationAddFeedArgs = {
+  url: Scalars['String'];
+  rssUrl?: InputMaybe<Scalars['String']>;
+};
+
+export type MutationDeleteFeedArgs = {
+  feedId: Scalars['String'];
 };
 
 export type MutationMarkReadArgs = {
@@ -52,6 +63,16 @@ export type CreateUserResponse = {
 export type LoginResponse = {
   __typename?: 'LoginResponse';
   token: Scalars['String'];
+};
+
+export type AddFeedResponse = {
+  __typename?: 'AddFeedResponse';
+  id: Scalars['String'];
+};
+
+export type DeleteFeedResponse = {
+  __typename?: 'DeleteFeedResponse';
+  id: Scalars['String'];
 };
 
 export type MarkReadResponse = {

@@ -1,6 +1,7 @@
 import {useCallback} from 'react';
 import Row from 'react-bootstrap/Row';
 import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
 import {PageHead} from './common/pageHead';
 import {useFeeds} from '../hooks/useFeeds';
 import FeedCard from './feedComponents/feedCard';
@@ -15,6 +16,8 @@ export interface FeedViewProps {
 
 const FeedView = ({onLogoutSuccess}: FeedViewProps) => {
   const {
+    addFeed,
+    deleteFeed,
     errorMessage,
     isFetching,
     hasFetched,
@@ -60,7 +63,22 @@ const FeedView = ({onLogoutSuccess}: FeedViewProps) => {
             Mark all as read
           </Button>
         ) : null}
-        <SubmitButton onClick={onLogOut}>Log out</SubmitButton>
+        <div />
+        <SubmitButton className="my-2" onClick={onLogOut}>
+          Log out
+        </SubmitButton>
+        <div />
+
+        <Form.Label className="my-2">Add Feed</Form.Label>
+        <Form.Control
+          onKeyDown={e => e.key === 'Enter' && addFeed(e.currentTarget.value)}
+        />
+
+        <SubmitButton
+          className="my-4"
+          onClick={() => deleteFeed(items?.[0]?.feedId ?? '')}>
+          Delete feed for first item
+        </SubmitButton>
       </Background>
     </div>
   );

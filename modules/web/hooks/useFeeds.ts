@@ -2,6 +2,8 @@ import {useCallback, useMemo, useState} from 'react';
 import {
   Feed,
   FeedItem,
+  MutationAddFeedArgs,
+  MutationDeleteFeedArgs,
   MutationMarkReadArgs,
 } from '../pages/api/graphql/models/types';
 import {FeedQuery, MarkRead} from '../queries/feedQueries';
@@ -9,6 +11,7 @@ import {graphqlRequest} from '../graphqlRequest';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {APP_FEED_REFRESH_TIME} from '../utils/consts';
 import {TOKEN_LOCAL_STORAGE} from '../pages/api/graphql/consts';
+import {AddFeed, DeleteFeed} from '../queries/userQueries';
 
 type FeedResponse = {
   feeds: Feed[];
@@ -34,6 +37,13 @@ export const useFeeds = () => {
   );
   const {mutate: markRead} = useMutation((variables: MutationMarkReadArgs) =>
     graphqlRequest(MarkRead, {...variables}),
+  );
+  const {mutate: addFeedByUrl} = useMutation((variables: MutationAddFeedArgs) =>
+    graphqlRequest(AddFeed, {...variables}),
+  );
+  const {mutate: deleteFeedById} = useMutation(
+    (variables: MutationDeleteFeedArgs) =>
+      graphqlRequest(DeleteFeed, {...variables}),
   );
 
   const errorMessage = useMemo(() => {
@@ -88,7 +98,16 @@ export const useFeeds = () => {
     return (!fetchAll && items?.length) || items?.find(item => !item.isRead);
   }, [fetchAll, items]);
 
+  const addFeed = (url: string) => {
+    addFeedByUrl({url}, {onSuccess: invalidateFeeds});
+  };
+  const deleteFeed = (id: string) => {
+    deleteFeedById({feedId: id}, {onSuccess: invalidateFeeds});
+  };
+
   return {
+    addFeed,
+    deleteFeed,
     errorMessage,
     fetchAll,
     hasFetched: isSuccess,

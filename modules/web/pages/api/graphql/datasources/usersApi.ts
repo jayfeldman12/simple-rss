@@ -9,6 +9,7 @@ import {
   Feed,
   LoginResponse,
   MarkReadResponse,
+  Maybe,
   MutationMarkReadArgs,
 } from '../models/types';
 import {FeedApi} from './feedApi';
@@ -66,10 +67,6 @@ export default class UsersApi extends MongoDataSource<User> {
     return {token: this.generateToken(user._id)};
   }
 
-  protected generateToken = (userId: string): string => {
-    return jwt.sign({userId}, process.env.JWT_SIGNING!);
-  };
-
   public markRead = async ({
     userId,
     feeds,
@@ -104,28 +101,45 @@ export default class UsersApi extends MongoDataSource<User> {
     }
   };
 
-  public addFeed = async (feed: Feed, feedApi: FeedApi, username: string) => {
-    if (!feed.rssUrl) {
-      feed.rssUrl = await feedApi.getRssLinkFromUrl(feed?.url);
-    }
-    await this.collection.updateOne({username}, {$addToSet: {feeds: feed}});
-    await this.deleteFromCacheByFields({username});
+  public addFeed = async (
+    url: string,
+    feedApi: FeedApi,
+    userId: ObjectId,
+    rssUrl?: Maybe<string>,
+  ) => {
+    const feed: Partial<Feed> = {
+      url,
+      _id: new ObjectId() as any,
+      ...(await (rssUrl
+        ? feedApi.getFeedInfoFromRssUrl(rssUrl)
+        : feedApi.getFeedInfoFromUrl(url))),
+    };
+
+    await this.collection.updateOne({_id: userId}, {$addToSet: {feeds: feed}});
+    await this.deleteFromCacheByFields({_id: userId});
   };
 
-  public async updateRssLinkForUser(
+  public deleteFeed = async (userId: ObjectId, feedId: ObjectId) => {
+    await this.collection.updateOne(
+      {_id: userId},
+      {$pull: {feeds: {_id: feedId}}},
+    );
+    await this.deleteFromCacheByFields({_id: userId});
+  };
+
+  protected generateToken = (userId: string): string => {
+    return jwt.sign({userId}, process.env.JWT_SIGNING!);
+  };
+
+  protected async updateRssLinkForUser(
     rssUrl: string,
     feedId: string,
-    username: string,
+    id: ObjectId,
   ) {
-    if (!rssUrl || !username) {
-      console.warn('Cannot update Rsslink due to missing link or username');
-      return;
-    }
-
     await this.collection.updateOne(
-      {username, 'feeds._id': feedId},
+      {_id: id, 'feeds._id': feedId},
       {$set: {'feeds.$.rssUrl': rssUrl}},
     );
-    await this.deleteFromCacheByFields({username});
+    await this.deleteFromCacheByFields({_id: id});
   }
 }

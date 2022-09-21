@@ -9,6 +9,8 @@ export const typeDefs = gql`
   type Mutation {
     createUser(username: String!, password: String!): CreateUserResponse
     login(username: String!, password: String!): LoginResponse
+    addFeed(url: String!, rssUrl: String): AddFeedResponse
+    deleteFeed(feedId: String!): DeleteFeedResponse
     markRead(feeds: [MarkReadFeed!]!): MarkReadResponse
   }
 
@@ -19,6 +21,14 @@ export const typeDefs = gql`
 
   type LoginResponse {
     token: String!
+  }
+
+  type AddFeedResponse {
+    id: String!
+  }
+
+  type DeleteFeedResponse {
+    id: String!
   }
 
   type MarkReadResponse {

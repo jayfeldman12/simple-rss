@@ -16,3 +16,19 @@ export const CreateUser = gql`
     }
   }
 `;
+
+export const AddFeed = gql`
+  mutation AddFeed($url: String!, $rssUrl: String) {
+    addFeed(url: $url, rssUrl: $rssUrl) {
+      id
+    }
+  }
+`;
+
+export const DeleteFeed = gql`
+  mutation DeleteFeed($feedId: String!) {
+    deleteFeed(feedId: $feedId) {
+      id
+    }
+  }
+`;

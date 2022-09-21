@@ -54,20 +54,41 @@ export class FeedApi extends RESTDataSource {
     });
   };
 
-  public getRssLinkFromUrl = async (url: string): Promise<string> => {
+  public getFeedInfoFromUrl = async (url: string): Promise<Partial<Feed>> => {
+    const origin = new URL(url).origin;
     const siteText = await this.withTimeout(
-      this.get(url, undefined, {cacheOptions: {ttl: ONE_DAY}}),
+      this.get(origin, undefined, {cacheOptions: {ttl: ONE_DAY}}),
     );
 
-    const rssLink = new JSDOM(siteText).window.document
-      .querySelector('link[type="application/rss+xml"]')
-      ?.getAttribute('href');
+    const rssTag = new JSDOM(siteText).window.document.querySelector(
+      'link[type="application/rss+xml"]',
+    );
+    const rssUrl = rssTag?.getAttribute('href');
 
-    if (rssLink) {
-      return new URL(rssLink, url).href;
+    if (rssUrl) {
+      return {
+        url: origin,
+        rssUrl: new URL(rssUrl, url).href,
+        reads: [],
+        title: rssTag?.getAttribute('title'),
+      };
     }
     // If no RSS feed found, reject promise because there will be no data
     throw Error(`RSS feed URL not found for ${url}`);
+  };
+
+  public getFeedInfoFromRssUrl = async (
+    rssUrl: string,
+  ): Promise<Partial<Feed>> => {
+    const response = await this.withTimeout(
+      this.get(rssUrl, undefined, {cacheOptions: {ttl: FEED_REFRESH_TTL}}),
+    );
+    const result = await new RssParser().parseString(response);
+    return {
+      rssUrl,
+      title: result.title,
+      reads: [],
+    };
   };
 
   // Adds a timeout, in ms, that the request will reject if it's not completed in that time
