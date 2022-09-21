@@ -127,6 +127,12 @@ export default class UsersApi extends MongoDataSource<User> {
     await this.deleteFromCacheByFields({_id: userId});
   };
 
+  public deleteUser = async (userId: ObjectId) => {
+    await this.collection.deleteOne({_id: userId});
+    await this.deleteFromCacheByFields({_id: userId});
+    return {id: userId};
+  };
+
   protected generateToken = (userId: string): string => {
     return jwt.sign({userId}, process.env.JWT_SIGNING!);
   };

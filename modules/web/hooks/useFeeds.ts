@@ -11,13 +11,13 @@ import {graphqlRequest} from '../graphqlRequest';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {APP_FEED_REFRESH_TIME} from '../utils/consts';
 import {TOKEN_LOCAL_STORAGE} from '../pages/api/graphql/consts';
-import {AddFeed, DeleteFeed} from '../queries/userQueries';
+import {AddFeed, DeleteFeed, DeleteUser} from '../queries/userQueries';
 
 type FeedResponse = {
   feeds: Feed[];
 };
 
-export const useFeeds = () => {
+export const useFeeds = (onLogout: () => void) => {
   const token = localStorage.getItem(TOKEN_LOCAL_STORAGE);
   const queryClient = useQueryClient();
   const [fetchAll, setFetchAll] = useState(false);
@@ -44,6 +44,9 @@ export const useFeeds = () => {
   const {mutate: deleteFeedById} = useMutation(
     (variables: MutationDeleteFeedArgs) =>
       graphqlRequest(DeleteFeed, {...variables}),
+  );
+  const {mutate: deleteUserMutation} = useMutation(() =>
+    graphqlRequest(DeleteUser, {}),
   );
 
   const errorMessage = useMemo(() => {
@@ -101,13 +104,24 @@ export const useFeeds = () => {
   const addFeed = (url: string) => {
     addFeedByUrl({url}, {onSuccess: invalidateFeeds});
   };
+
   const deleteFeed = (id: string) => {
     deleteFeedById({feedId: id}, {onSuccess: invalidateFeeds});
+  };
+
+  const deleteUser = () => {
+    deleteUserMutation(undefined, {
+      onSuccess: () => {
+        localStorage.removeItem(TOKEN_LOCAL_STORAGE);
+        onLogout();
+      },
+    });
   };
 
   return {
     addFeed,
     deleteFeed,
+    deleteUser,
     errorMessage,
     fetchAll,
     hasFetched: isSuccess,

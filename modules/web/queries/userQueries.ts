@@ -32,3 +32,11 @@ export const DeleteFeed = gql`
     }
   }
 `;
+
+export const DeleteUser = gql`
+  mutation DeleteUser {
+    deleteUser {
+      id
+    }
+  }
+`;

@@ -18,6 +18,7 @@ const FeedView = ({onLogoutSuccess}: FeedViewProps) => {
   const {
     addFeed,
     deleteFeed,
+    deleteUser,
     errorMessage,
     isFetching,
     hasFetched,
@@ -28,7 +29,7 @@ const FeedView = ({onLogoutSuccess}: FeedViewProps) => {
     showFetchAll,
     showMarkAllRead,
     unreadCount,
-  } = useFeeds();
+  } = useFeeds(onLogoutSuccess);
 
   const onLogOut = useCallback(() => {
     localStorage.removeItem(TOKEN_LOCAL_STORAGE);
@@ -78,6 +79,10 @@ const FeedView = ({onLogoutSuccess}: FeedViewProps) => {
           className="my-4"
           onClick={() => deleteFeed(items?.[0]?.feedId ?? '')}>
           Delete feed for first item
+        </SubmitButton>
+        <div />
+        <SubmitButton className="my-4" onClick={deleteUser}>
+          Delete user
         </SubmitButton>
       </Background>
     </div>

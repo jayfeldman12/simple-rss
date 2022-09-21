@@ -29,6 +29,7 @@ export type Mutation = {
   addFeed?: Maybe<AddFeedResponse>;
   deleteFeed?: Maybe<DeleteFeedResponse>;
   markRead?: Maybe<MarkReadResponse>;
+  deleteUser?: Maybe<DeleteUser>;
 };
 
 export type MutationCreateUserArgs = {
@@ -78,6 +79,11 @@ export type DeleteFeedResponse = {
 export type MarkReadResponse = {
   __typename?: 'MarkReadResponse';
   count: Scalars['Int'];
+};
+
+export type DeleteUser = {
+  __typename?: 'DeleteUser';
+  id: Scalars['String'];
 };
 
 export type MarkReadFeed = {

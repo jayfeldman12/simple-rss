@@ -57,6 +57,9 @@ export const resolvers: Config['resolvers'] = {
     ) => {
       return dataSources.usersApi.markRead({...args, userId: id});
     },
+    deleteUser: (_parent, _args, {userId, dataSources}: RequestContext) => {
+      return dataSources.usersApi.deleteUser(userId);
+    },
   },
   Feed: {
     feedItems: async (
