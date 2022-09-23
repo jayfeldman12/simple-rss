@@ -55,7 +55,8 @@ export class FeedApi extends RESTDataSource {
   };
 
   public getFeedInfoFromUrl = async (url: string): Promise<Partial<Feed>> => {
-    const origin = new URL(url).origin;
+    const fixedUrl = url.includes('http') ? url : 'https://' + url;
+    const origin = new URL(fixedUrl).origin;
     const siteText = await this.withTimeout(
       this.get(origin, undefined, {cacheOptions: {ttl: ONE_DAY}}),
     );
@@ -68,7 +69,7 @@ export class FeedApi extends RESTDataSource {
     if (rssUrl) {
       return {
         url: origin,
-        rssUrl: new URL(rssUrl, url).href,
+        rssUrl: new URL(rssUrl, fixedUrl).href,
         reads: [],
         title: rssTag?.getAttribute('title'),
       };

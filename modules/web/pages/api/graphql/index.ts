@@ -9,6 +9,7 @@ import UsersApi from './datasources/usersApi';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import {JWTToken} from './models/jwtToken';
+import {Errors} from '../../../errors';
 
 // If on prod, this env variable should be already set by the build.
 // Otherwise,this sets locally from a .env file
@@ -47,7 +48,7 @@ const server = new ApolloServer({
       console.log('row', rawToken);
     } finally {
       if (!rawToken?.userId) {
-        throw new AuthenticationError('Unauthorized');
+        throw new AuthenticationError(Errors.UNAUTHORIZED);
       }
     }
 

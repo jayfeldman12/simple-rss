@@ -1,22 +1,27 @@
 import {useCallback, useState} from 'react';
-import {Background} from './common/background';
-import {PageHead} from './common/pageHead';
-import SubmitButton from './common/SubmitButton';
 import {useMutation} from '@tanstack/react-query';
 import {MutationLoginArgs} from '../pages/api/graphql/models/types';
 import {graphqlRequest} from '../graphqlRequest';
 import {Login} from '../queries/userQueries';
-import {TOKEN_LOCAL_STORAGE} from '../pages/api/graphql/consts';
 import Form from 'react-bootstrap/Form';
+import {Background} from '../components/common/background';
+import {PageHead} from '../components/common/pageHead';
+import SubmitButton from '../components/common/SubmitButton';
+import {useRouter} from 'next/router';
+import {useTokenContext} from '../hooks/tokenProvider';
 
-export interface LoginProps {
-  onCreateUserPress: () => void;
-  onLoginSuccess: () => void;
-}
-
-export const LoginView = ({onCreateUserPress, onLoginSuccess}: LoginProps) => {
+const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const router = useRouter();
+  const {setNewToken} = useTokenContext();
+
+  const onLoginSuccess = useCallback(() => {
+    router.push('feeds');
+  }, [router]);
+  const onCreateUserPress = useCallback(() => {
+    router.push('createAccount');
+  }, [router]);
 
   const {
     mutate: login,
@@ -33,7 +38,7 @@ export const LoginView = ({onCreateUserPress, onLoginSuccess}: LoginProps) => {
       {
         onSuccess: ({login: {token}}) => {
           if (token) {
-            localStorage.setItem(TOKEN_LOCAL_STORAGE, token);
+            setNewToken(token);
             onLoginSuccess();
           } else {
             throw new Error('Token missing from login');
@@ -41,7 +46,7 @@ export const LoginView = ({onCreateUserPress, onLoginSuccess}: LoginProps) => {
         },
       },
     );
-  }, [login, onLoginSuccess, password, username]);
+  }, [login, onLoginSuccess, password, setNewToken, username]);
 
   return (
     <div>
@@ -83,3 +88,5 @@ export const LoginView = ({onCreateUserPress, onLoginSuccess}: LoginProps) => {
     </div>
   );
 };
+
+export default LoginPage;

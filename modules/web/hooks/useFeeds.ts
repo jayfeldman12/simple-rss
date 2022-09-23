@@ -10,17 +10,19 @@ import {FeedQuery, MarkRead} from '../queries/feedQueries';
 import {graphqlRequest} from '../graphqlRequest';
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import {APP_FEED_REFRESH_TIME} from '../utils/consts';
-import {TOKEN_LOCAL_STORAGE} from '../pages/api/graphql/consts';
 import {AddFeed, DeleteFeed, DeleteUser} from '../queries/userQueries';
+import {useTokenContext} from './tokenProvider';
+import {Errors} from '../errors';
 
 type FeedResponse = {
   feeds: Feed[];
 };
 
 export const useFeeds = (onLogout: () => void) => {
-  const token = localStorage.getItem(TOKEN_LOCAL_STORAGE);
+  const {token, clearToken} = useTokenContext();
   const queryClient = useQueryClient();
   const [fetchAll, setFetchAll] = useState(false);
+  const [locallyRead, setLocallyRead] = useState<string[]>([]);
 
   const {
     data: {feeds} = {},
@@ -53,17 +55,30 @@ export const useFeeds = (onLogout: () => void) => {
     if (!error || isFetching) {
       return '';
     }
-  }, [error, isFetching]);
+    console.log('error', error.message.includes(Errors.UNAUTHORIZED));
+    if (error.message.includes(Errors.UNAUTHORIZED)) {
+      onLogout();
+      return;
+    }
+    console.warn(error.message);
+  }, [error, isFetching, onLogout]);
 
   const items = useMemo(() => {
     if (feeds) {
-      const results = feeds.flatMap(feed => feed.feedItems);
+      const results = feeds.flatMap(feed =>
+        feed.feedItems.map(item => {
+          if (locallyRead.includes(item.id)) {
+            item.isRead = true;
+          }
+          return item;
+        }),
+      );
       const sorted = results.sort(
         (a, b) => new Date(b.date).valueOf() - new Date(a.date).valueOf(),
       );
       return sorted;
     }
-  }, [feeds]);
+  }, [feeds, locallyRead]);
 
   const invalidateFeeds = useCallback(
     () => queryClient.invalidateQueries(['getFeeds' + token + !fetchAll]),
@@ -74,7 +89,7 @@ export const useFeeds = (onLogout: () => void) => {
     if (!item.isRead) {
       markRead(
         {feeds: [{id: item.feedId, feedItemIds: [item.id]}]},
-        {onSuccess: invalidateFeeds},
+        {onSuccess: () => setLocallyRead(read => [...read, item.id])},
       );
     }
     window.open(item.url);
@@ -112,7 +127,7 @@ export const useFeeds = (onLogout: () => void) => {
   const deleteUser = () => {
     deleteUserMutation(undefined, {
       onSuccess: () => {
-        localStorage.removeItem(TOKEN_LOCAL_STORAGE);
+        clearToken();
         onLogout();
       },
     });

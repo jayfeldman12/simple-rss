@@ -2,19 +2,25 @@ import {useCallback} from 'react';
 import Row from 'react-bootstrap/Row';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import {PageHead} from './common/pageHead';
+import {Background} from '../components/common/background';
+import {PageHead} from '../components/common/pageHead';
+import {Spinner} from '../components/common/Spinner';
+import SubmitButton from '../components/common/SubmitButton';
+import FeedCard from '../components/feedComponents/feedCard';
 import {useFeeds} from '../hooks/useFeeds';
-import FeedCard from './feedComponents/feedCard';
-import {Background} from './common/background';
-import {Spinner} from './common/Spinner';
-import SubmitButton from './common/SubmitButton';
-import {TOKEN_LOCAL_STORAGE} from '../pages/api/graphql/consts';
+import {useRouter} from 'next/router';
+import {useTokenContext} from '../hooks/tokenProvider';
 
-export interface FeedViewProps {
-  onLogoutSuccess: () => void;
-}
+const FeedsPage = () => {
+  const router = useRouter();
+  const logOut = useCallback(() => router.replace('login'), [router]);
+  const {clearToken} = useTokenContext();
 
-const FeedView = ({onLogoutSuccess}: FeedViewProps) => {
+  const onLogOut = useCallback(() => {
+    clearToken;
+    logOut();
+  }, [logOut, clearToken]);
+
   const {
     addFeed,
     deleteFeed,
@@ -29,12 +35,7 @@ const FeedView = ({onLogoutSuccess}: FeedViewProps) => {
     showFetchAll,
     showMarkAllRead,
     unreadCount,
-  } = useFeeds(onLogoutSuccess);
-
-  const onLogOut = useCallback(() => {
-    localStorage.removeItem(TOKEN_LOCAL_STORAGE);
-    onLogoutSuccess();
-  }, [onLogoutSuccess]);
+  } = useFeeds(logOut);
 
   return (
     <div>
@@ -89,4 +90,4 @@ const FeedView = ({onLogoutSuccess}: FeedViewProps) => {
   );
 };
 
-export default FeedView;
+export default FeedsPage;

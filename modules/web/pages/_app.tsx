@@ -4,6 +4,7 @@ import '../styles/custom.scss';
 import '../styles/globals.css';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {APP_FEED_REFRESH_TIME} from '../utils/consts';
+import {TokenProvider} from '../hooks/tokenProvider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,10 +20,15 @@ const App = ({Component, pageProps}: AppProps) => {
   return (
     <>
       <QueryClientProvider client={queryClient}>
-        <Head>
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-        </Head>
-        <Component {...pageProps} />
+        <TokenProvider>
+          <Head>
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1"
+            />
+          </Head>
+          <Component {...pageProps} />
+        </TokenProvider>
       </QueryClientProvider>
     </>
   );

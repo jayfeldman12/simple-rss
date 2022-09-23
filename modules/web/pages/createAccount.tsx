@@ -1,27 +1,29 @@
 import {useCallback, useState} from 'react';
-import {Background} from './common/background';
-import {PageHead} from './common/pageHead';
-import SubmitButton from './common/SubmitButton';
 import {useMutation} from '@tanstack/react-query';
 import {MutationCreateUserArgs} from '../pages/api/graphql/models/types';
 import {graphqlRequest} from '../graphqlRequest';
 import {CreateUser} from '../queries/userQueries';
-import {TOKEN_LOCAL_STORAGE} from '../pages/api/graphql/consts';
 import Form from 'react-bootstrap/Form';
+import {PageHead} from '../components/common/pageHead';
+import {Background} from '../components/common/background';
+import SubmitButton from '../components/common/SubmitButton';
+import {useRouter} from 'next/router';
+import {useTokenContext} from '../hooks/tokenProvider';
 
-export interface CreateAccountProps {
-  onLoginPress: () => void;
-  onCreateAccountSuccess: () => void;
-}
-
-export const CreateAccount = ({
-  onLoginPress,
-  onCreateAccountSuccess,
-}: CreateAccountProps) => {
+const CreateAccountPage = ({}) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmError, setConfirmError] = useState('');
+  const router = useRouter();
+  const {setNewToken} = useTokenContext();
+
+  const onCreateAccountSuccess = useCallback(() => {
+    router.replace('feeds');
+  }, [router]);
+  const onLoginPress = useCallback(() => {
+    router.back();
+  }, [router]);
 
   const {
     mutate: createAccount,
@@ -43,7 +45,7 @@ export const CreateAccount = ({
       {
         onSuccess: ({createUser: {token}}) => {
           if (token) {
-            localStorage.setItem(TOKEN_LOCAL_STORAGE, token);
+            setNewToken(token);
             onCreateAccountSuccess();
           } else {
             throw new Error('Token missing from create account');
@@ -57,6 +59,7 @@ export const CreateAccount = ({
     createAccount,
     onCreateAccountSuccess,
     password,
+    setNewToken,
     username,
   ]);
 
@@ -112,3 +115,5 @@ export const CreateAccount = ({
     </div>
   );
 };
+
+export default CreateAccountPage;
