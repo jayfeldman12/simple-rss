@@ -21,12 +21,13 @@ type RequestContext = JWTToken & {
 
 export const resolvers: Config['resolvers'] = {
   Query: {
-    feeds: async (
-      _parent,
-      _args,
-      {userId: id, dataSources}: RequestContext,
-    ) => {
-      return (await dataSources.usersApi.getUser(id))?.feeds ?? [];
+    feeds: async (_parent, args, {userId: id, dataSources}: RequestContext) => {
+      console.log('args', args.feedId);
+      return (
+        (await dataSources.usersApi.getUser(id))?.feeds.filter(feed =>
+          args.feedId ? args.feedId === feed._id.toString() : true,
+        ) ?? []
+      );
     },
   },
   Mutation: {

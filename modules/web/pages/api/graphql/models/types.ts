@@ -109,6 +109,7 @@ export type Feed = {
 /** A URL users subscribe to for RSS feeds */
 export type FeedFeedItemsArgs = {
   onlyUnread?: InputMaybe<Scalars['Boolean']>;
+  feedId?: InputMaybe<Scalars['String']>;
 };
 
 /** RSS feed item */

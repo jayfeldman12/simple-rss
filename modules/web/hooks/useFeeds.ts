@@ -18,7 +18,7 @@ type FeedResponse = {
   feeds: Feed[];
 };
 
-export const useFeeds = (onLogout: () => void) => {
+export const useFeeds = (onLogout: () => void, feedId?: string) => {
   const {token, clearToken} = useTokenContext();
   const queryClient = useQueryClient();
   const [fetchAll, setFetchAll] = useState(false);
@@ -30,8 +30,8 @@ export const useFeeds = (onLogout: () => void) => {
     isFetching,
     error,
   } = useQuery<FeedResponse, Error>(
-    ['getFeeds' + token + !fetchAll],
-    () => graphqlRequest(FeedQuery, {onlyUnread: !fetchAll}),
+    ['getFeeds' + token + !fetchAll + feedId],
+    () => graphqlRequest(FeedQuery, {onlyUnread: !fetchAll, feedId}),
     {
       refetchInterval: APP_FEED_REFRESH_TIME + 10, // make sure it's not marked as stale
       refetchIntervalInBackground: true,

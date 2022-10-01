@@ -1,8 +1,8 @@
 import {gql} from 'graphql-request';
 
 export const FeedQuery = gql`
-  query FeedQuery($onlyUnread: Boolean) {
-    feeds {
+  query FeedQuery($onlyUnread: Boolean, $feedId: String) {
+    feeds(feedId: $feedId) {
       _id
       title
       feedItems(onlyUnread: $onlyUnread) {
