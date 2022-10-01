@@ -49,6 +49,7 @@ export const typeDefs = gql`
   type Feed {
     "A list of IDs on this feed a user has read. Used to highlight unread items"
     _id: ID!
+    icon: String
     description: String
     feedItems(onlyUnread: Boolean): [FeedItem!]!
     reads: [ID!]

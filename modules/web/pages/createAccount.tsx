@@ -67,50 +67,52 @@ const CreateAccountPage = ({}) => {
     <div>
       <PageHead />
       <Background>
-        <h1>Simple Rss</h1>
-        <Form.Label className="py-3">Username</Form.Label>
-        <Form.Control
-          id="username"
-          title="Username"
-          onChange={e => setUsername(e.target.value)}></Form.Control>
-        <Form.Label className="py-3">Password</Form.Label>
-        <Form.Control
-          id="password"
-          type="password"
-          title="Password"
-          onChange={e => setPassword(e.target.value)}></Form.Control>
-        <Form.Label className="py-3">Password</Form.Label>
-        <Form.Control
-          id="confirmPassword"
-          type="password"
-          title="confirmPassword"
-          onChange={e => setConfirmPassword(e.target.value)}
-          onKeyDown={e =>
-            e.key === 'Enter' && onCreateAccount()
-          }></Form.Control>
-        {confirmError ? (
-          <h5 className="py-2 text-danger">{confirmError}</h5>
-        ) : null}
-        <SubmitButton
-          className="col-sm-6 my-4"
-          isLoading={isLoading}
-          disabled={!username || !password || !confirmPassword}
-          onClick={onCreateAccount}>
-          Create Account
-        </SubmitButton>
+        <div className="px-4 py-3">
+          <h1>Simple Rss</h1>
+          <Form.Label className="py-3">Username</Form.Label>
+          <Form.Control
+            id="username"
+            title="Username"
+            onChange={e => setUsername(e.target.value)}></Form.Control>
+          <Form.Label className="py-3">Password</Form.Label>
+          <Form.Control
+            id="password"
+            type="password"
+            title="Password"
+            onChange={e => setPassword(e.target.value)}></Form.Control>
+          <Form.Label className="py-3">Password</Form.Label>
+          <Form.Control
+            id="confirmPassword"
+            type="password"
+            title="confirmPassword"
+            onChange={e => setConfirmPassword(e.target.value)}
+            onKeyDown={e =>
+              e.key === 'Enter' && onCreateAccount()
+            }></Form.Control>
+          {confirmError ? (
+            <h5 className="py-2 text-danger">{confirmError}</h5>
+          ) : null}
+          <SubmitButton
+            className="col-sm-6 my-4"
+            isLoading={isLoading}
+            disabled={!username || !password || !confirmPassword}
+            onClick={onCreateAccount}>
+            Create Account
+          </SubmitButton>
 
-        {error ? (
-          <h5 className="text-danger">
-            Error creating account. Make sure your password is at least 8
-            characters and has one letter and one number. If that is already
-            met, try another username
-          </h5>
-        ) : null}
+          {error ? (
+            <h5 className="text-danger">
+              Error creating account. Make sure your password is at least 8
+              characters and has one letter and one number. If that is already
+              met, try another username
+            </h5>
+          ) : null}
 
-        <div className="py-2"></div>
-        <SubmitButton className="col-sm-4 my-4" onClick={onLoginPress}>
-          Already have an account?
-        </SubmitButton>
+          <div className="py-2"></div>
+          <SubmitButton className="col-sm-4 my-4" onClick={onLoginPress}>
+            Already have an account?
+          </SubmitButton>
+        </div>
       </Background>
     </div>
   );

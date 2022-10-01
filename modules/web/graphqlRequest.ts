@@ -7,7 +7,6 @@ export const graphqlRequest = (query: RequestDocument, variables: unknown) => {
   const token = localStorage.getItem(TOKEN_LOCAL_STORAGE);
   const headers: Record<string, string> = {};
   if (token) {
-    console.log('setting authorization');
     headers.authorization = `Bearer ${token}`;
   }
 

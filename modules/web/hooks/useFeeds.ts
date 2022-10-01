@@ -1,27 +1,12 @@
-import {useCallback, useMemo, useState} from 'react';
-import {
-  Feed,
-  FeedItem,
-  MutationAddFeedArgs,
-  MutationDeleteFeedArgs,
-  MutationMarkReadArgs,
-} from '../pages/api/graphql/models/types';
-import {FeedQuery, MarkRead} from '../queries/feedQueries';
-import {graphqlRequest} from '../graphqlRequest';
-import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
-import {APP_FEED_REFRESH_TIME} from '../utils/consts';
-import {AddFeed, DeleteFeed, DeleteUser} from '../queries/userQueries';
+import {useEffect, useMemo, useState} from 'react';
+import {FeedItem} from '../pages/api/graphql/models/types';
 import {useTokenContext} from './tokenProvider';
 import {Errors} from '../errors';
-
-type FeedResponse = {
-  feeds: Feed[];
-};
+import {useGetFeeds, useMarkRead} from '../queries/apis';
 
 export const useFeeds = (onLogout: () => void, feedId?: string) => {
-  const {token, clearToken} = useTokenContext();
-  const queryClient = useQueryClient();
-  const [fetchAll, setFetchAll] = useState(false);
+  const {token} = useTokenContext();
+  const [fetchAll, setFetchAll] = useState(!!feedId);
   const [locallyRead, setLocallyRead] = useState<string[]>([]);
 
   const {
@@ -29,33 +14,18 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
     isSuccess,
     isFetching,
     error,
-  } = useQuery<FeedResponse, Error>(
-    ['getFeeds' + token + !fetchAll + feedId],
-    () => graphqlRequest(FeedQuery, {onlyUnread: !fetchAll, feedId}),
-    {
-      refetchInterval: APP_FEED_REFRESH_TIME + 10, // make sure it's not marked as stale
-      refetchIntervalInBackground: true,
-    },
-  );
-  const {mutate: markRead} = useMutation((variables: MutationMarkReadArgs) =>
-    graphqlRequest(MarkRead, {...variables}),
-  );
-  const {mutate: addFeedByUrl} = useMutation((variables: MutationAddFeedArgs) =>
-    graphqlRequest(AddFeed, {...variables}),
-  );
-  const {mutate: deleteFeedById} = useMutation(
-    (variables: MutationDeleteFeedArgs) =>
-      graphqlRequest(DeleteFeed, {...variables}),
-  );
-  const {mutate: deleteUserMutation} = useMutation(() =>
-    graphqlRequest(DeleteUser, {}),
-  );
+  } = useGetFeeds(token, fetchAll, feedId);
+
+  const {mutate: markRead} = useMarkRead();
+
+  useEffect(() => {
+    if (feedId) setFetchAll(true);
+  }, [feedId]);
 
   const errorMessage = useMemo(() => {
     if (!error || isFetching) {
       return '';
     }
-    console.log('error', error.message.includes(Errors.UNAUTHORIZED));
     if (error.message.includes(Errors.UNAUTHORIZED)) {
       onLogout();
       return;
@@ -80,11 +50,6 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
     }
   }, [feeds, locallyRead]);
 
-  const invalidateFeeds = useCallback(
-    () => queryClient.invalidateQueries(['getFeeds' + token + !fetchAll]),
-    [fetchAll, queryClient, token],
-  );
-
   const onItemClick = (item: FeedItem) => {
     if (!item.isRead) {
       markRead(
@@ -95,58 +60,20 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
     window.open(item.url);
   };
 
-  const markAllRead = useCallback(() => {
-    if (!feeds) return;
-    const request: MutationMarkReadArgs = {
-      feeds: feeds.map(feed => ({
-        id: feed._id,
-        feedItemIds: feed.feedItems.map(item => item.id),
-      })),
-    };
-    markRead(request, {onSuccess: invalidateFeeds});
-  }, [feeds, invalidateFeeds, markRead]);
-
   const unreadCount = useMemo(
     () =>
       items?.reduce((acc, nextItem) => (nextItem.isRead ? acc : acc + 1), 0),
     [items],
   );
 
-  const haveUnreads = useMemo(() => {
-    return (!fetchAll && items?.length) || items?.find(item => !item.isRead);
-  }, [fetchAll, items]);
-
-  const addFeed = (url: string) => {
-    addFeedByUrl({url}, {onSuccess: invalidateFeeds});
-  };
-
-  const deleteFeed = (id: string) => {
-    deleteFeedById({feedId: id}, {onSuccess: invalidateFeeds});
-  };
-
-  const deleteUser = () => {
-    deleteUserMutation(undefined, {
-      onSuccess: () => {
-        clearToken();
-        onLogout();
-      },
-    });
-  };
-
   return {
-    addFeed,
-    deleteFeed,
-    deleteUser,
     errorMessage,
-    fetchAll,
     hasFetched: isSuccess,
     isFetching,
     items,
-    markAllRead,
     onItemClick,
     setFetchAll,
-    showFetchAll: !fetchAll && feeds,
-    showMarkAllRead: haveUnreads,
+    showFetchAll: !fetchAll && !!feeds,
     unreadCount,
   };
 };

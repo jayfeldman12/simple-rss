@@ -42,10 +42,8 @@ const server = new ApolloServer({
 
     const token = req.headers.authorization?.split('Bearer ')[1] ?? '';
     let rawToken: JWTToken;
-    console.log('token', token);
     try {
       rawToken = jwt.verify(token, process.env.JWT_SIGNING!) as JWTToken;
-      console.log('row', rawToken);
     } finally {
       if (!rawToken?.userId) {
         throw new AuthenticationError(Errors.UNAUTHORIZED);

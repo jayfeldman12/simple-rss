@@ -4,6 +4,7 @@ export const FeedQuery = gql`
   query FeedQuery($onlyUnread: Boolean, $feedId: String) {
     feeds(feedId: $feedId) {
       _id
+      icon
       title
       feedItems(onlyUnread: $onlyUnread) {
         date

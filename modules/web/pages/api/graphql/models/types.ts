@@ -22,6 +22,10 @@ export type Query = {
   feeds?: Maybe<Array<Maybe<Feed>>>;
 };
 
+export type QueryFeedsArgs = {
+  feedId?: InputMaybe<Scalars['String']>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createUser?: Maybe<CreateUserResponse>;
@@ -96,6 +100,7 @@ export type Feed = {
   __typename?: 'Feed';
   /** A list of IDs on this feed a user has read. Used to highlight unread items */
   _id: Scalars['ID'];
+  icon?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
   feedItems: Array<FeedItem>;
   reads?: Maybe<Array<Scalars['ID']>>;
@@ -109,7 +114,6 @@ export type Feed = {
 /** A URL users subscribe to for RSS feeds */
 export type FeedFeedItemsArgs = {
   onlyUnread?: InputMaybe<Scalars['Boolean']>;
-  feedId?: InputMaybe<Scalars['String']>;
 };
 
 /** RSS feed item */

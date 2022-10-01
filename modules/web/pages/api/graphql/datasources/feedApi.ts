@@ -60,18 +60,23 @@ export class FeedApi extends RESTDataSource {
     const siteText = await this.withTimeout(
       this.get(origin, undefined, {cacheOptions: {ttl: ONE_DAY}}),
     );
-
-    const rssTag = new JSDOM(siteText).window.document.querySelector(
-      'link[type="application/rss+xml"]',
-    );
-    const rssUrl = rssTag?.getAttribute('href');
+    const document = new JSDOM(siteText).window.document;
+    const rssUrl = document
+      .querySelector('link[type="application/rss+xml"]')
+      ?.getAttribute('href');
+    const icon = document
+      .querySelector('link[type="image/x-icon"]')
+      ?.getAttribute('href');
 
     if (rssUrl) {
+      const rssFixedUrl = new URL(rssUrl, fixedUrl).href;
+      const title = (await this.getFeedInfoFromRssUrl(rssFixedUrl)).title ?? '';
       return {
         url: origin,
-        rssUrl: new URL(rssUrl, fixedUrl).href,
+        rssUrl: rssFixedUrl,
+        icon: icon ? new URL(icon, fixedUrl).href : undefined,
         reads: [],
-        title: rssTag?.getAttribute('title'),
+        title,
       };
     }
     // If no RSS feed found, reject promise because there will be no data
