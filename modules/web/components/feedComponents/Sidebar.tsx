@@ -90,9 +90,9 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
       })),
     };
     markRead(request, {
-      onSuccess: () => queryClient.invalidateQueries(getFeedKey(token)),
+      onSuccess: refetchFeeds,
     });
-  }, [feeds, markRead, queryClient, token]);
+  }, [feeds, markRead, refetchFeeds]);
 
   return (
     <div className="d-flex flex-column bg-secondary align-items-start col-2 px-4 py-5">
