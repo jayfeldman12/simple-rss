@@ -64,9 +64,11 @@ export class FeedApi extends RESTDataSource {
     const rssUrl = document
       .querySelector('link[type="application/rss+xml"]')
       ?.getAttribute('href');
-    const icon = document
-      .querySelector('link[type="image/x-icon"]')
-      ?.getAttribute('href');
+    const icon =
+      document
+        .querySelector('link[type="image/x-icon"]')
+        ?.getAttribute('href') ??
+      document.querySelector('link[rel="SHORTCUT ICON"]')?.getAttribute('href');
 
     if (rssUrl) {
       const rssFixedUrl = new URL(rssUrl, fixedUrl).href;

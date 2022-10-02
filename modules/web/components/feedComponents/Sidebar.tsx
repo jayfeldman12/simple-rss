@@ -36,10 +36,23 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
     logOut();
   }, [clearToken, logOut]);
 
-  const {data: {feeds} = {}} = useGetFeeds(token, false);
+  const {data: {feeds} = {}, refetch: refetchFeeds} = useGetFeeds(token, false);
   const {mutate: markRead} = useMarkRead();
-  const {mutate: addFeedByUrl, isLoading: addingFeed} = useAddFeed();
-  const {mutate: deleteFeedById, isLoading: deletingFeed} = useDeleteFeed();
+  const {
+    mutate: addFeedByUrl,
+    isLoading: addingFeed,
+    error: addFeedError,
+  } = useAddFeed({
+    onSuccess: () => {
+      refetchFeeds();
+    },
+  });
+  const {mutate: deleteFeedById, isLoading: deletingFeed} = useDeleteFeed({
+    onSuccess: () => {
+      router.replace('/feeds');
+      refetchFeeds();
+    },
+  });
   const {mutate: deleteUser, isLoading: deletingUser} = useDeleteUser();
 
   const addFeed = (url: string) => {
@@ -93,7 +106,11 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
           Get all items
         </Button>
       ) : null}
-      <AddFeed addFeedLoading={addingFeed} onSubmit={addFeed} />
+      <AddFeed
+        addFeedLoading={addingFeed}
+        onSubmit={addFeed}
+        error={!!addFeedError}
+      />
       <Link href={'/feeds'}>
         <p>All feeds</p>
       </Link>

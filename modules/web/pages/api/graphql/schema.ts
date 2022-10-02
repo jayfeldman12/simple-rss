@@ -12,7 +12,7 @@ export const typeDefs = gql`
     addFeed(url: String!, rssUrl: String): AddFeedResponse
     deleteFeed(feedId: String!): DeleteFeedResponse
     markRead(feeds: [MarkReadFeed!]!): MarkReadResponse
-    deleteUser: DeleteUser
+    deleteUser: DeleteUserResponse
   }
 
   type CreateUserResponse {
@@ -36,7 +36,7 @@ export const typeDefs = gql`
     count: Int!
   }
 
-  type DeleteUser {
+  type DeleteUserResponse {
     id: String!
   }
 

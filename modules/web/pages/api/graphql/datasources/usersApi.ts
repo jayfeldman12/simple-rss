@@ -107,6 +107,7 @@ export default class UsersApi extends MongoDataSource<User> {
     userId: ObjectId,
     rssUrl?: Maybe<string>,
   ) => {
+    const userPromise = this.getUser(userId);
     const feed: Partial<Feed> = {
       url,
       _id: new ObjectId() as any,
@@ -114,6 +115,10 @@ export default class UsersApi extends MongoDataSource<User> {
         ? feedApi.getFeedInfoFromRssUrl(rssUrl)
         : feedApi.getFeedInfoFromUrl(url))),
     };
+    const user = await userPromise;
+    if (user?.feeds.some(oldFeed => oldFeed.url === feed.url)) {
+      throw new Error('This feed already exists');
+    }
 
     await this.collection.updateOne({_id: userId}, {$addToSet: {feeds: feed}});
     await this.deleteFromCacheByFields({_id: userId});
