@@ -14,7 +14,6 @@ import {FeedQuery, MarkRead} from './feedQueries';
 import {AddFeed, DeleteFeed, DeleteUser} from './userQueries';
 import {
   QueryKey,
-  useQueryClient,
   useQuery,
   useMutation,
   UseMutationOptions,
@@ -85,15 +84,8 @@ export const useAddFeed = (
     | undefined,
 ) => {
   return useMutation<AddFeedResponse, Error, MutationAddFeedArgs>(
-    async (variables: MutationAddFeedArgs) => {
-      const response: AddFeedResponse = await graphqlRequest(AddFeed, {
-        ...variables,
-      });
-      if (response.id) {
-        throw new Error('Failed to add feed');
-      }
-      return response;
-    },
+    async (variables: MutationAddFeedArgs) =>
+      graphqlRequest(AddFeed, {...variables}),
     options,
   );
 };

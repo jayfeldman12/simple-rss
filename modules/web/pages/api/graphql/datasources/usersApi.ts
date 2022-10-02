@@ -93,7 +93,7 @@ export default class UsersApi extends MongoDataSource<User> {
     try {
       const response = await this.collection.updateOne(
         {_id: userId, 'feeds._id': new ObjectId(feedId)},
-        {$addToSet: {'feeds.$.reads': {$each: [...feedItemIds]}}},
+        {$push: {'feeds.$.reads': {$each: [...feedItemIds], $slice: -1000}}},
       );
       return response.modifiedCount;
     } catch {
@@ -116,6 +116,10 @@ export default class UsersApi extends MongoDataSource<User> {
         : feedApi.getFeedInfoFromUrl(url))),
     };
     const user = await userPromise;
+    if (!user) throw new Error('User not found');
+    if (user.feeds.length >= 50) {
+      throw new Error('Maximum of 50 feeds');
+    }
     if (user?.feeds.some(oldFeed => oldFeed.url === feed.url)) {
       throw new Error('This feed already exists');
     }

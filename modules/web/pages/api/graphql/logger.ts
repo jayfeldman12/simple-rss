@@ -3,7 +3,7 @@ import {PluginDefinition} from 'apollo-server-core';
 export const logger: PluginDefinition = {
   // Fires whenever a GraphQL request is received from a client.
   async requestDidStart(requestContext) {
-    console.log('Request started!');
+    console.log('Request started!', new Date().toUTCString());
 
     return {
       // Fires whenever Apollo Server will parse a GraphQL
