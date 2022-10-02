@@ -61,9 +61,13 @@ export class FeedApi extends RESTDataSource {
       this.get(origin, undefined, {cacheOptions: {ttl: ONE_DAY}}),
     );
     const document = new JSDOM(siteText).window.document;
-    const rssUrl = document
-      .querySelector('link[type="application/rss+xml"]')
-      ?.getAttribute('href');
+    const rssUrl =
+      document
+        .querySelector('link[type="application/rss+xml"]')
+        ?.getAttribute('href') ??
+      document
+        .querySelector('link[type="application/atom+xml"]')
+        ?.getAttribute('href');
     const icon =
       document
         .querySelector('link[type="image/x-icon"]')
