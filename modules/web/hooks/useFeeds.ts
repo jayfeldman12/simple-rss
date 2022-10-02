@@ -20,6 +20,7 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
 
   useEffect(() => {
     if (feedId) setFetchAll(true);
+    else setFetchAll(false);
   }, [feedId]);
 
   const errorMessage = useMemo(() => {
