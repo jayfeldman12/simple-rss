@@ -24,8 +24,6 @@ const FeedsPage = () => {
     unreadCount,
   } = useFeeds(logOut, feedId);
 
-  console.log('rerendering with data', items);
-
   return (
     <div>
       <PageHead unreadCount={unreadCount} />

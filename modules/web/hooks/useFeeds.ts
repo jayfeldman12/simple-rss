@@ -2,19 +2,21 @@ import {useEffect, useMemo, useState} from 'react';
 import {FeedItem} from '../pages/api/graphql/models/types';
 import {useTokenContext} from './tokenProvider';
 import {Errors} from '../errors';
-import {useGetFeeds, useMarkRead} from '../queries/apis';
+import {useGetFeeds, useMarkRead, getFeedKey} from '../queries/apis';
+import {useQueryClient} from '@tanstack/react-query';
 
 export const useFeeds = (onLogout: () => void, feedId?: string) => {
   const {token} = useTokenContext();
   const [fetchAll, setFetchAll] = useState(!!feedId);
   const [locallyRead, setLocallyRead] = useState<string[]>([]);
+  const queryClient = useQueryClient();
 
   const {
     data: {feeds} = {},
     isSuccess,
     isFetching,
     error,
-  } = useGetFeeds(token, fetchAll, feedId);
+  } = useGetFeeds(token, {fetchAll, feedId});
 
   const {mutate: markRead} = useMarkRead();
 
@@ -55,7 +57,13 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
     if (!item.isRead) {
       markRead(
         {feeds: [{id: item.feedId, feedItemIds: [item.id]}]},
-        {onSuccess: () => setLocallyRead(read => [...read, item.id])},
+        {
+          onSuccess: () => {
+            setLocallyRead(read => [...read, item.id]);
+            // Clear the sidebar query
+            queryClient.invalidateQueries(getFeedKey(token, {isSidebar: true}));
+          },
+        },
       );
     }
     window.open(item.url);

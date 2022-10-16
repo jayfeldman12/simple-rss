@@ -20,7 +20,7 @@ export class FeedApi extends RESTDataSource {
     {rssUrl, reads, _id: feedId, url}: Feed,
     onlyUnread?: boolean,
   ): Promise<FeedItem[]> => {
-    return this.feedCache.getCacheOrFetch('', async () => {
+    return this.feedCache.getCacheOrFetch(feedId, async () => {
       const rawResponse = await this.withTimeout(
         this.get(rssUrl, undefined, {cacheOptions: {ttl: FEED_REFRESH_TTL}}),
       );

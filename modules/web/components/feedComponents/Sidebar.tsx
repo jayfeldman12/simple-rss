@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 
 import Button from 'react-bootstrap/Button';
 import SubmitButton from '../../components/common/SubmitButton';
@@ -16,14 +16,19 @@ import {
 } from '../../queries/apis';
 import {useQueryClient} from '@tanstack/react-query';
 import {MutationMarkReadArgs} from '../../pages/api/graphql/models/types';
+import {useWindowDimensions} from '../../hooks/useWindowDimensions';
 
 interface SidebarProps {
   showFetchAll: boolean;
   onPressFetchAll: () => void;
 }
 
+const buttonHeight = '2.5rem';
+
 export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
+  const [showReallyDelete, setShowReallyDelete] = useState(false);
   const queryClient = useQueryClient();
+  const {windowHeight} = useWindowDimensions();
 
   const router = useRouter();
 
@@ -36,7 +41,10 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
     logOut();
   }, [clearToken, logOut]);
 
-  const {data: {feeds} = {}, refetch: refetchFeeds} = useGetFeeds(token, false);
+  const {data: {feeds} = {}, refetch: refetchFeeds} = useGetFeeds(token, {
+    fetchAll: false,
+    isSidebar: true,
+  });
   const {mutate: markRead} = useMarkRead();
   const {
     mutate: addFeedByUrl,
@@ -95,74 +103,108 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
   }, [feeds, markRead, refetchFeeds]);
 
   return (
-    <div className="d-flex flex-column bg-secondary align-items-start col-2 px-4 py-5">
-      {Object.keys(unreadCount) ? (
-        <Button className="my-2" onClick={markAllRead}>
-          Mark all as read
-        </Button>
-      ) : null}
-      {showFetchAll ? (
-        <Button className="my-2" onClick={onPressFetchAll}>
-          Get all items
-        </Button>
-      ) : null}
-      <AddFeed
-        addFeedLoading={addingFeed}
-        onSubmit={addFeed}
-        error={!!addFeedError}
-      />
-      <Link href={'/feeds'}>
-        <p>All feeds</p>
-      </Link>
-      {feeds?.map(feed => {
-        const unread = unreadCount[feed._id];
-        return (
-          <Link key={feed._id} href={`/feeds/${feed._id}`}>
-            <div className="d-flex flex-row my-1 align-self-stretch align-items-center justify-content-between">
-              <div className="d-flex flex-row align-items-center">
-                {feed.icon ? (
-                  // Using image from arbitrary remote sources, so don't want API optimization
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={feed.icon}
-                    alt={`Icon for ${feed.title}`}
-                    width="25"
-                    height="25"
-                    className="me-2"
-                  />
+    <div
+      className="d-flex flex-column bg-secondary col-2 px-4 py-5 justify-content-between"
+      style={{minHeight: windowHeight}}>
+      <div className="d-flex flex-column align-items-start">
+        {Object.keys(unreadCount) ? (
+          <Button
+            className="my-2"
+            onClick={markAllRead}
+            style={{height: buttonHeight}}>
+            Mark all as read
+          </Button>
+        ) : (
+          <div className="my-2" style={{height: buttonHeight}} />
+        )}
+        {showFetchAll ? (
+          <Button
+            className="my-2"
+            onClick={onPressFetchAll}
+            style={{height: buttonHeight}}>
+            Get all items
+          </Button>
+        ) : (
+          <div className="my-2" style={{height: buttonHeight}} />
+        )}
+        <AddFeed
+          addFeedLoading={addingFeed}
+          onSubmit={addFeed}
+          error={!!addFeedError}
+        />
+        <Link href={'/feeds'}>
+          <p>All feeds</p>
+        </Link>
+        {feeds?.map(feed => {
+          const unread = unreadCount[feed._id];
+          return (
+            <Link key={feed._id} href={`/feeds/${feed._id}`}>
+              <div
+                className="d-flex flex-row my-1 align-self-stretch align-items-center justify-content-between"
+                style={{cursor: 'pointer'}}>
+                <div className="d-flex flex-row align-items-center">
+                  {feed.icon ? (
+                    // Using image from arbitrary remote sources, so don't want API optimization
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={feed.icon}
+                      alt={`Icon for ${feed.title}`}
+                      width="25"
+                      height="25"
+                      className="me-2"
+                    />
+                  ) : (
+                    <div style={{height: 25, width: 25}} className="me-2" />
+                  )}
+                  <p
+                    className="text-start mb-0"
+                    style={{
+                      fontWeight:
+                        activeFeed?._id === feed._id ? 'bold' : 'normal',
+                    }}>
+                    {feed.title}
+                  </p>
+                </div>
+                {unread ? (
+                  <p className="mb-0 text-info ms-2">{unread}</p>
                 ) : null}
-                <p
-                  className="text-start mb-0"
-                  style={{
-                    fontWeight:
-                      activeFeed?._id === feed._id ? 'bold' : 'normal',
-                  }}>
-                  {feed.title}
-                </p>
               </div>
-              {unread ? <p className="mb-0 text-info ms-2">{unread}</p> : null}
-            </div>
-          </Link>
-        );
-      })}
-      <SubmitButton className="my-2 mt-5" onClick={onLogOut}>
-        Log out
-      </SubmitButton>
-
-      {feedId && activeFeed ? (
-        <SubmitButton
-          className="my-4"
-          isLoading={deletingFeed}
-          onClick={() => deleteFeedById({feedId})}>
-          Unsubscribe from {activeFeed.title}
+            </Link>
+          );
+        })}
+      </div>
+      <div className="d-flex flex-column align-items-start">
+        <SubmitButton className="my-2 mt-5" onClick={onLogOut}>
+          Log out
         </SubmitButton>
-      ) : null}
-      <SubmitButton
-        className="my-2"
-        isLoading={deletingUser}
-        onClick={() => deleteUser()}>
-        Delete account
-      </SubmitButton>
+
+        {feedId && activeFeed ? (
+          <SubmitButton
+            className="my-4"
+            isLoading={deletingFeed}
+            onClick={() => deleteFeedById({feedId})}>
+            Unsubscribe from {activeFeed.title}
+          </SubmitButton>
+        ) : null}
+        <SubmitButton
+          className={`my-2 ${
+            showReallyDelete
+              ? 'border-warning bg-warning'
+              : 'border-danger bg-danger'
+          }`}
+          isLoading={deletingUser}
+          onClick={() => setShowReallyDelete(prevValue => !prevValue)}>
+          {showReallyDelete ? 'Never mind' : 'Delete account'}
+        </SubmitButton>
+        {showReallyDelete ? (
+          <SubmitButton
+            className="my-2 bg-danger border-danger"
+            isLoading={deletingUser}
+            onClick={() => deleteUser()}>
+            Really delete?
+          </SubmitButton>
+        ) : null}
+      </div>
     </div>
   );
 };

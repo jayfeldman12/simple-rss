@@ -24,23 +24,29 @@ type FeedResponse = {
   feeds: Feed[];
 };
 
-export const getFeedKey = (
-  token?: string,
-  fetchAll?: boolean,
-  feedId?: string,
-) => ['getFeeds', token, {fetchAll, feedId}];
+type GetFeedOptions = {
+  fetchAll?: boolean;
+  feedId?: string;
+  isSidebar?: boolean;
+};
+
+export const getFeedKey = (token?: string, options?: GetFeedOptions) => [
+  'getFeeds',
+  token,
+  options,
+];
 
 export const useGetFeeds = (
   token?: string,
-  fetchAll?: boolean,
-  feedId?: string,
+  feedOptions: GetFeedOptions = {},
   options?: Omit<
     UseQueryOptions<FeedResponse, Error, FeedResponse, QueryKey>,
     'queryKey' | 'queryFn' | 'initialData'
   >,
 ) => {
+  const {fetchAll, feedId} = feedOptions;
   return useQuery<FeedResponse, Error>(
-    getFeedKey(token, fetchAll, feedId),
+    getFeedKey(token, feedOptions),
     () => graphqlRequest(FeedQuery, {onlyUnread: !fetchAll, feedId}),
     {
       refetchInterval: APP_FEED_REFRESH_TIME + 10, // make sure it's not marked as stale
