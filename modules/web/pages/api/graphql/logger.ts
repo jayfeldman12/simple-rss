@@ -19,7 +19,7 @@ export const logger: PluginDefinition = {
       },
 
       async willSendResponse() {
-        console.log('response sent');
+        console.log('response sent', new Date().toUTCString());
       },
 
       async didEncounterErrors(errorContext) {
