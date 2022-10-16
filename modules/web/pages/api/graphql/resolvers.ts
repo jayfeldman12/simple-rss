@@ -11,6 +11,7 @@ import {
 import UsersApi from './datasources/usersApi';
 import {JWTToken} from './models/jwtToken';
 import {ObjectId} from 'mongodb';
+import {Logger} from './logger';
 
 type RequestContext = JWTToken & {
   dataSources: {
@@ -22,6 +23,7 @@ type RequestContext = JWTToken & {
 export const resolvers: Config['resolvers'] = {
   Query: {
     feeds: async (_parent, args, {userId: id, dataSources}: RequestContext) => {
+      Logger().log('Hitting get feeds');
       return (
         (await dataSources.usersApi.getUser(id))?.feeds.filter(feed =>
           args.feedId ? args.feedId === feed._id.toString() : true,

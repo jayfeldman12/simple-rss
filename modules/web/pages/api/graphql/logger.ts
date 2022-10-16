@@ -1,29 +1,49 @@
 import {PluginDefinition} from 'apollo-server-core';
 
+export const Logger = () => {
+  const info = (...message: any) => {
+    console.info(...message, new Date().toUTCString());
+  };
+
+  const log = (...message: any) => {
+    console.log(...message, new Date().toUTCString());
+  };
+
+  const error = (...message: any) => {
+    console.error(...message, new Date().toUTCString());
+  };
+
+  return {
+    error,
+    info,
+    log,
+  };
+};
+
 export const logger: PluginDefinition = {
   // Fires whenever a GraphQL request is received from a client.
   async requestDidStart(requestContext) {
-    console.log('Request started!', new Date().toUTCString());
+    Logger().log('Request started!');
 
     return {
       // Fires whenever Apollo Server will parse a GraphQL
       // request to create its associated document AST.
       async parsingDidStart() {
-        console.log('Parsing started!');
+        Logger().info('Parsing started!');
       },
 
       // Fires whenever Apollo Server will validate a
       // request's document AST against your GraphQL schema.
       async validationDidStart() {
-        console.log('Validation started!');
+        Logger().info('Validation started!');
       },
 
       async willSendResponse() {
-        console.log('response sent', new Date().toUTCString());
+        Logger().log('Response sent', new Date().toUTCString());
       },
 
       async didEncounterErrors(errorContext) {
-        console.log('found an error', errorContext.errors);
+        Logger().error('Found an error', errorContext.errors);
       },
     };
   },
