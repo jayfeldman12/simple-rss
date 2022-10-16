@@ -23,12 +23,12 @@ type RequestContext = JWTToken & {
 export const resolvers: Config['resolvers'] = {
   Query: {
     feeds: async (_parent, args, {userId: id, dataSources}: RequestContext) => {
-      Logger().log('Hitting get feeds');
+      Logger.log('Hitting get feeds');
       const response =
         (await dataSources.usersApi.getUser(id))?.feeds.filter(feed =>
           args.feedId ? args.feedId === feed._id.toString() : true,
         ) ?? [];
-      Logger().log('Finished getting feeds');
+      Logger.log('Finished getting feeds');
       return response;
     },
   },
@@ -70,9 +70,12 @@ export const resolvers: Config['resolvers'] = {
       args,
       {dataSources}: RequestContext,
     ): Promise<FeedItem[]> => {
-      return (
+      Logger.log('Getting a feed item', feed.url);
+      const response = (
         await dataSources.feedApi.getItemsFromFeed(feed, args.onlyUnread)
       ).filter(x => x) as FeedItem[];
+      Logger.log('Finished getting feed item');
+      return response;
     },
   },
 };

@@ -27,6 +27,7 @@ const feedApi = new FeedApi();
 const usersApi = new UsersApi(mongoClient.db().collection('users'));
 console.log('running top level code');
 const server = new ApolloServer({
+  cache: 'bounded',
   typeDefs,
   resolvers,
   dataSources: () => {
