@@ -74,7 +74,6 @@ export const resolvers: Config['resolvers'] = {
       const response = (
         await dataSources.feedApi.getItemsFromFeed(feed, args.onlyUnread)
       ).filter(x => x) as FeedItem[];
-      Logger.log('Finished getting feed item', feed.url);
       return response;
     },
   },

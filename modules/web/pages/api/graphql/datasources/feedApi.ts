@@ -20,7 +20,7 @@ export class FeedApi extends RESTDataSource {
     const response = await this.withTimeout(
       this.get(rssUrl, undefined, {cacheOptions: {ttl: FEED_REFRESH_TTL}}),
     );
-    Logger.info('Finished getting a feed item', rssUrl);
+    Logger.info('got item', rssUrl);
     const result = await new RssParser().parseString(response);
     return result.items.map(item => {
       const image = (() => {
@@ -42,8 +42,8 @@ export class FeedApi extends RESTDataSource {
 
       const id = item.guid || item.link || '';
       const isRead = reads?.includes(id) ?? false;
+      Logger.info('format response', rssUrl);
       if (onlyUnread && isRead) return undefined;
-      Logger.info('Response for item', rssUrl);
       return {
         date: item.isoDate ?? '',
         description: item.contentSnippet,
