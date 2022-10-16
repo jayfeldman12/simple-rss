@@ -24,11 +24,12 @@ export const resolvers: Config['resolvers'] = {
   Query: {
     feeds: async (_parent, args, {userId: id, dataSources}: RequestContext) => {
       Logger().log('Hitting get feeds');
-      return (
+      const response =
         (await dataSources.usersApi.getUser(id))?.feeds.filter(feed =>
           args.feedId ? args.feedId === feed._id.toString() : true,
-        ) ?? []
-      );
+        ) ?? [];
+      Logger().log('Finished getting feeds');
+      return response;
     },
   },
   Mutation: {
