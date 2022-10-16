@@ -107,26 +107,22 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
       className="d-flex flex-column bg-secondary col-2 px-4 py-5 justify-content-between"
       style={{minHeight: windowHeight}}>
       <div className="d-flex flex-column align-items-start">
-        {Object.keys(unreadCount).length ? (
-          <Button
-            className="my-2"
-            onClick={markAllRead}
-            style={{height: buttonHeight}}>
-            Mark all as read
-          </Button>
-        ) : (
-          <div className="my-2" style={{height: buttonHeight}} />
-        )}
-        {showFetchAll ? (
-          <Button
-            className="my-2"
-            onClick={onPressFetchAll}
-            style={{height: buttonHeight}}>
-            Get all items
-          </Button>
-        ) : (
-          <div className="my-2" style={{height: buttonHeight}} />
-        )}
+        <Button
+          disabled={!Object.keys(unreadCount).length}
+          className="my-2"
+          onClick={markAllRead}
+          style={{height: buttonHeight}}>
+          Mark all as read
+        </Button>
+
+        <Button
+          className="my-2"
+          disabled={!showFetchAll}
+          onClick={onPressFetchAll}
+          style={{height: buttonHeight}}>
+          Get all items
+        </Button>
+
         <AddFeed
           addFeedLoading={addingFeed}
           onSubmit={addFeed}
