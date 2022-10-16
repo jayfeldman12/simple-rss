@@ -23,14 +23,16 @@ const mongoClient = new MongoClient(process.env.MONGODB_URI ?? '');
 
 Logger.setLevel('debug');
 mongoClient.connect();
+const feedApi = new FeedApi();
+const usersApi = new UsersApi(mongoClient.db().collection('users'));
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
   dataSources: () => {
     return {
-      feedApi: new FeedApi(),
-      usersApi: new UsersApi(mongoClient.db().collection('users')),
+      feedApi,
+      usersApi,
     };
   },
   context: ({req}): JWTToken => {
