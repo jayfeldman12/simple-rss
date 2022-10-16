@@ -25,7 +25,7 @@ Logger.setLevel('debug');
 mongoClient.connect();
 const feedApi = new FeedApi();
 const usersApi = new UsersApi(mongoClient.db().collection('users'));
-
+console.log('running top level code');
 const server = new ApolloServer({
   typeDefs,
   resolvers,

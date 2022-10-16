@@ -13,6 +13,7 @@ import {
   MutationMarkReadArgs,
 } from '../models/types';
 import {FeedApi} from './feedApi';
+import {USER_REFRESH_TIME} from '../../../../utils/consts';
 
 export default class UsersApi extends MongoDataSource<User> {
   protected INVALID_CREDENTIALS = 'Invalid credentials';
@@ -21,7 +22,7 @@ export default class UsersApi extends MongoDataSource<User> {
   protected collection: Collection<Document>;
 
   public async getUser(userId: ObjectId) {
-    return this.findOneById(userId);
+    return this.findOneById(userId, {ttl: USER_REFRESH_TIME});
   }
 
   public async createUser(
@@ -78,7 +79,7 @@ export default class UsersApi extends MongoDataSource<User> {
           (await this.markFeedItemsRead(userId, feed.id, feed.feedItemIds)),
         new Promise(res => res(0)),
       );
-      await this.deleteFromCacheByFields({userId});
+      await this.deleteFromCacheById(userId);
       return {count};
     } catch {
       return {count: 0};
@@ -95,6 +96,7 @@ export default class UsersApi extends MongoDataSource<User> {
         {_id: userId, 'feeds._id': new ObjectId(feedId)},
         {$push: {'feeds.$.reads': {$each: [...feedItemIds], $slice: -1000}}},
       );
+      await this.deleteFromCacheById(userId);
       return response.modifiedCount;
     } catch {
       return 0;
@@ -125,7 +127,7 @@ export default class UsersApi extends MongoDataSource<User> {
     }
 
     await this.collection.updateOne({_id: userId}, {$addToSet: {feeds: feed}});
-    await this.deleteFromCacheByFields({_id: userId});
+    await this.deleteFromCacheById(userId);
   };
 
   public deleteFeed = async (userId: ObjectId, feedId: ObjectId) => {
@@ -133,12 +135,12 @@ export default class UsersApi extends MongoDataSource<User> {
       {_id: userId},
       {$pull: {feeds: {_id: feedId}}},
     );
-    await this.deleteFromCacheByFields({_id: userId});
+    await this.deleteFromCacheById(userId);
   };
 
   public deleteUser = async (userId: ObjectId) => {
     await this.collection.deleteOne({_id: userId});
-    await this.deleteFromCacheByFields({_id: userId});
+    await this.deleteFromCacheById(userId);
     return {id: userId};
   };
 
@@ -155,6 +157,6 @@ export default class UsersApi extends MongoDataSource<User> {
       {_id: id, 'feeds._id': feedId},
       {$set: {'feeds.$.rssUrl': rssUrl}},
     );
-    await this.deleteFromCacheByFields({_id: id});
+    await this.deleteFromCacheById(id);
   }
 }
