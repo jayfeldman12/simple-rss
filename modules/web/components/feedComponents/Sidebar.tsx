@@ -107,7 +107,7 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
       className="d-flex flex-column bg-secondary col-2 px-4 py-5 justify-content-between"
       style={{minHeight: windowHeight}}>
       <div className="d-flex flex-column align-items-start">
-        {Object.keys(unreadCount) ? (
+        {Object.keys(unreadCount).length ? (
           <Button
             className="my-2"
             onClick={markAllRead}
