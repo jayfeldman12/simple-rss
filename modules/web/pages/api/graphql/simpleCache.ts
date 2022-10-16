@@ -20,8 +20,7 @@ export class SimpleCache<T> {
         cachedResponse.timestampMillis + this.ttl * 1000,
       ).getTime();
       if (freshTimestamp > new Date().getTime()) {
-        // Cache is still valid use it
-        console.log('Using cached response for', key);
+        // Cache is still valid, use it
         return cachedResponse.response;
       } else {
         // Cache is invalid, delete it
