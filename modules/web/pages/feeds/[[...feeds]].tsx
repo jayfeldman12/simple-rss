@@ -19,6 +19,7 @@ const FeedsPage = () => {
     isFetching,
     items,
     onItemClick,
+    screenTitle,
     setFetchAll,
     showFetchAll,
     unreadCount,
@@ -35,7 +36,7 @@ const FeedsPage = () => {
           />
           {/* Main body */}
           <div className="col px-5 py-4">
-            <h1 className="pb-4">Welcome to Simple RSS</h1>
+            <h1 className="pb-5">{screenTitle}</h1>
             {errorMessage ? (
               <h5 className="text-danger">{errorMessage}</h5>
             ) : null}

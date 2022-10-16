@@ -81,6 +81,7 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
     isFetching,
     items,
     onItemClick,
+    screenTitle: feedId ? feeds?.[0]?.title ?? 'Your feeds' : 'Your feeds',
     setFetchAll,
     showFetchAll: !fetchAll && !!feeds,
     unreadCount,
