@@ -70,11 +70,10 @@ export const resolvers: Config['resolvers'] = {
       args,
       {dataSources}: RequestContext,
     ): Promise<FeedItem[]> => {
-      Logger.log('Getting a feed item', feed.url);
-      const response = (
-        await dataSources.feedApi.getItemsFromFeed(feed, args.onlyUnread)
-      ).filter(x => x) as FeedItem[];
-      Logger.log('Got item', feed.url);
+      const response = await dataSources.feedApi.getItemsFromFeed(
+        feed,
+        args.onlyUnread,
+      );
       return response;
     },
   },

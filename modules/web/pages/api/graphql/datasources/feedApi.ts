@@ -4,56 +4,61 @@ import {Feed, FeedItem} from '../models/types';
 import {JSDOM} from 'jsdom';
 import RssParser from 'rss-parser';
 import {FEED_REFRESH_TTL} from '../consts';
-import {Logger} from '../logger';
+import {SimpleCache} from '../simpleCache';
 
 const ONE_DAY = 60 * 60 * 24;
 
 export class FeedApi extends RESTDataSource {
+  protected feedCache: SimpleCache<FeedItem[]>;
+
   constructor() {
     super();
+    this.feedCache = new SimpleCache();
   }
 
   public getItemsFromFeed = async (
-    {rssUrl, reads, _id: feedId}: Feed,
+    {rssUrl, reads, _id: feedId, url}: Feed,
     onlyUnread?: boolean,
-  ): Promise<(FeedItem | undefined)[]> => {
-    const response = await this.withTimeout(
-      this.get(rssUrl, undefined, {cacheOptions: {ttl: FEED_REFRESH_TTL}}),
-    );
-    // Logger.info('got item', rssUrl);
-    const result = await new RssParser().parseString(response);
-    return result.items.map(item => {
-      const image = (() => {
-        if (item.enclosure?.url) return item.enclosure.url;
+  ): Promise<FeedItem[]> => {
+    return this.feedCache.getCacheOrFetch('', async () => {
+      const rawResponse = await this.withTimeout(
+        this.get(rssUrl, undefined, {cacheOptions: {ttl: FEED_REFRESH_TTL}}),
+      );
+      const result = await new RssParser().parseString(rawResponse);
+      return result.items
+        .map(item => {
+          const image = (() => {
+            if (item.enclosure?.url) return item.enclosure.url;
 
-        const content = new JSDOM(item.content).window.document;
+            const content = new JSDOM(item.content).window.document;
 
-        const img = content.querySelector('img')?.getAttribute('src');
-        if (img) return img;
+            const img = content.querySelector('img')?.getAttribute('src');
+            if (img) return img;
 
-        const contentEncoded = new JSDOM(item['content:encoded']).window
-          .document;
+            const contentEncoded = new JSDOM(item['content:encoded']).window
+              .document;
 
-        const aHref = Array.from(contentEncoded.querySelectorAll('a'))
-          .find(aTag => aTag.getAttribute('href')?.match(/png|jgp|svg|gif/))
-          ?.getAttribute('href');
-        return aHref ?? '';
-      })();
+            const aHref = Array.from(contentEncoded.querySelectorAll('a'))
+              .find(aTag => aTag.getAttribute('href')?.match(/png|jgp|svg|gif/))
+              ?.getAttribute('href');
+            return aHref ?? '';
+          })();
 
-      const id = item.guid || item.link || '';
-      const isRead = reads?.includes(id) ?? false;
-      // Logger.info('format response', rssUrl);
-      if (onlyUnread && isRead) return undefined;
-      return {
-        date: item.isoDate ?? '',
-        description: item.contentSnippet,
-        feedId: feedId,
-        id,
-        image: image ?? '',
-        isRead,
-        title: item.title,
-        url: item.link ?? '',
-      };
+          const id = item.guid || item.link || '';
+          const isRead = reads?.includes(id) ?? false;
+          if (onlyUnread && isRead) return undefined;
+          return {
+            date: item.isoDate ?? '',
+            description: item.contentSnippet,
+            feedId: feedId,
+            id,
+            image: image ?? '',
+            isRead,
+            title: item.title,
+            url: item.link ?? '',
+          };
+        })
+        .filter(x => x) as FeedItem[];
     });
   };
 
