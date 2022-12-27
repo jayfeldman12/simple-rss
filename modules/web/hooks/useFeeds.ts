@@ -61,7 +61,9 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
           onSuccess: () => {
             setLocallyRead(read => [...read, item.id]);
             // Clear the sidebar query
-            queryClient.invalidateQueries(getFeedKey(token, {isSidebar: true}));
+            queryClient.invalidateQueries({
+              queryKey: getFeedKey(token, {isSidebar: true}),
+            });
           },
         },
       );

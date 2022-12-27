@@ -66,7 +66,10 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
   const addFeed = (url: string) => {
     addFeedByUrl(
       {url},
-      {onSuccess: () => queryClient.invalidateQueries(getFeedKey(token))},
+      {
+        onSuccess: () =>
+          queryClient.invalidateQueries({queryKey: getFeedKey(token)}),
+      },
     );
   };
 
