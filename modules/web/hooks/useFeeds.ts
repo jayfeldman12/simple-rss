@@ -1,9 +1,9 @@
-import {useEffect, useMemo, useState} from 'react';
-import {FeedItem} from '../pages/api/graphql/models/types';
-import {useTokenContext} from './tokenProvider';
-import {Errors} from '../errors';
-import {useGetFeeds, useMarkRead, getFeedKey} from '../queries/apis';
 import {useQueryClient} from '@tanstack/react-query';
+import {useEffect, useMemo, useState} from 'react';
+import {Errors} from '../errors';
+import {FeedItem} from '../pages/api/graphql/models/types';
+import {getFeedKey, useGetFeeds, useMarkRead} from '../queries/apis';
+import {useTokenContext} from './tokenProvider';
 
 export const useFeeds = (onLogout: () => void, feedId?: string) => {
   const {token} = useTokenContext();
@@ -68,7 +68,6 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
         },
       );
     }
-    window.open(item.url);
   };
 
   const unreadCount = useMemo(

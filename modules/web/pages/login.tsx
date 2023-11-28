@@ -1,14 +1,14 @@
-import {useCallback, useState} from 'react';
 import {useMutation} from '@tanstack/react-query';
-import {MutationLoginArgs} from '../pages/api/graphql/models/types';
-import {graphqlRequest} from '../graphqlRequest';
-import {Login} from '../queries/userQueries';
+import {useRouter} from 'next/router';
+import {useCallback, useState} from 'react';
 import Form from 'react-bootstrap/Form';
+import SubmitButton from '../components/common/SubmitButton';
 import {Background} from '../components/common/background';
 import {PageHead} from '../components/common/pageHead';
-import SubmitButton from '../components/common/SubmitButton';
-import {useRouter} from 'next/router';
+import {graphqlRequest} from '../graphqlRequest';
 import {useTokenContext} from '../hooks/tokenProvider';
+import {MutationLoginArgs} from '../pages/api/graphql/models/types';
+import {Login} from '../queries/userQueries';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');

@@ -15,3 +15,8 @@ a:link {
     color-scheme: dark;
   }
 }
+
+a.no-text-change {
+  text-decoration: none;
+  color: inherit;
+}
