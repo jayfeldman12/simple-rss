@@ -8,7 +8,7 @@ import {Sidebar} from '../../components/feedComponents/Sidebar';
 import FeedCard from '../../components/feedComponents/feedCard';
 import {useFeeds} from '../../hooks/useFeeds';
 import {useAppDispatch, useAppSelector} from '../../hooks/useRedux';
-import {decremented, incremented} from '../store';
+import {decremented, incremented} from '../../store';
 
 const FeedsPage = () => {
   const router = useRouter();
