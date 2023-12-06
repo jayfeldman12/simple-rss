@@ -1,12 +1,14 @@
+import {useRouter} from 'next/router';
 import {useCallback} from 'react';
 import Row from 'react-bootstrap/Row';
+import {Spinner} from '../../components/common/Spinner';
 import {Background} from '../../components/common/background';
 import {PageHead} from '../../components/common/pageHead';
-import {Spinner} from '../../components/common/Spinner';
+import {Sidebar} from '../../components/feedComponents/Sidebar';
 import FeedCard from '../../components/feedComponents/feedCard';
 import {useFeeds} from '../../hooks/useFeeds';
-import {useRouter} from 'next/router';
-import {Sidebar} from '../../components/feedComponents/Sidebar';
+import {useAppDispatch, useAppSelector} from '../../hooks/useRedux';
+import {decremented, incremented} from '../store';
 
 const FeedsPage = () => {
   const router = useRouter();
@@ -24,6 +26,9 @@ const FeedsPage = () => {
     showFetchAll,
     unreadCount,
   } = useFeeds(logOut, feedId);
+
+  const count = useAppSelector(state => state.counter.value);
+  const dispatch = useAppDispatch();
 
   return (
     <div>
@@ -44,6 +49,9 @@ const FeedsPage = () => {
             {hasFetched && !items?.length ? (
               <h5 className="py-5">All read!</h5>
             ) : null}
+            <button onClick={() => dispatch(incremented())}>Increment</button>
+            <button onClick={() => dispatch(decremented())}>Decrement</button>
+            <div>Value: {count}</div>
             <Row xs={1} md={2} lg={3} xl={4} className="g-4 text-dark">
               {items?.map(item => (
                 <FeedCard key={item.id} item={item} onItemClick={onItemClick} />

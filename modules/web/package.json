@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.0.1",
     "@tanstack/react-query": "^4.3.4",
     "apollo-datasource-mongodb": "^0.5.4",
     "apollo-datasource-rest": "^3.7.0",
@@ -28,6 +29,8 @@
     "react-dom": "18.2.0",
     "react-icons": "^4.4.0",
     "react-is": "^18.2.0",
+    "react-redux": "^9.0.2",
+    "redux": "^5.0.0",
     "rss-parser": "^3.12.0"
   },
   "devDependencies": {

@@ -1,22 +1,23 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 
+import {useQueryClient} from '@tanstack/react-query';
+import Link from 'next/link';
+import {useRouter} from 'next/router';
 import Button from 'react-bootstrap/Button';
 import SubmitButton from '../../components/common/SubmitButton';
 import {AddFeed} from '../../components/feedComponents/AddFeed';
-import Link from 'next/link';
-import {useRouter} from 'next/router';
 import {useTokenContext} from '../../hooks/tokenProvider';
+import {useAppSelector} from '../../hooks/useRedux';
+import {useWindowDimensions} from '../../hooks/useWindowDimensions';
+import {MutationMarkReadArgs} from '../../pages/api/graphql/models/types';
 import {
-  useMarkRead,
+  getFeedKey,
   useAddFeed,
   useDeleteFeed,
   useDeleteUser,
   useGetFeeds,
-  getFeedKey,
+  useMarkRead,
 } from '../../queries/apis';
-import {useQueryClient} from '@tanstack/react-query';
-import {MutationMarkReadArgs} from '../../pages/api/graphql/models/types';
-import {useWindowDimensions} from '../../hooks/useWindowDimensions';
 
 interface SidebarProps {
   showFetchAll: boolean;
@@ -26,6 +27,7 @@ interface SidebarProps {
 const buttonHeight = '2.5rem';
 
 export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
+  const value = useAppSelector(state => state.counter.value);
   const [showReallyDelete, setShowReallyDelete] = useState(false);
   const queryClient = useQueryClient();
   const {windowHeight} = useWindowDimensions();
@@ -117,6 +119,8 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
           style={{height: buttonHeight}}>
           Mark all as read
         </Button>
+
+        <div>Count is {value}</div>
 
         <Button
           className="my-2"
