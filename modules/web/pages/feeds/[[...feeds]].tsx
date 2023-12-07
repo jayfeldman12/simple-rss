@@ -8,7 +8,8 @@ import {Sidebar} from '../../components/feedComponents/Sidebar';
 import FeedCard from '../../components/feedComponents/feedCard';
 import {useFeeds} from '../../hooks/useFeeds';
 import {useAppDispatch, useAppSelector} from '../../hooks/useRedux';
-import {decremented, incremented} from '../../store';
+import {useFetchBreedsQuery} from '../../redux/dogs-api-slice';
+import {decremented, incremented} from '../../redux/store';
 
 const FeedsPage = () => {
   const router = useRouter();
@@ -29,6 +30,7 @@ const FeedsPage = () => {
 
   const count = useAppSelector(state => state.counter.value);
   const dispatch = useAppDispatch();
+  const {data, isLoading} = useFetchBreedsQuery(10);
 
   return (
     <div>

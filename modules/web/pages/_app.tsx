@@ -3,7 +3,7 @@ import type {AppProps} from 'next/app';
 import Head from 'next/head';
 import {Provider} from 'react-redux';
 import {TokenProvider} from '../hooks/tokenProvider';
-import {store} from '../store';
+import {store} from '../redux/store';
 import '../styles/custom.scss';
 import '../styles/globals.css';
 import {APP_FEED_REFRESH_TIME} from '../utils/consts';

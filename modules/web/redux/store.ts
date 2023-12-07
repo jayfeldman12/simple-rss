@@ -1,4 +1,5 @@
 import {PayloadAction, configureStore, createSlice} from '@reduxjs/toolkit';
+import {apiSlice} from './dogs-api-slice';
 
 interface CounterState {
   value: number;
@@ -26,7 +27,10 @@ export const {incremented, decremented} = counterSlice.actions;
 export const store = configureStore({
   reducer: {
     counter: counterSlice.reducer,
+    [apiSlice.reducerPath]: apiSlice.reducer,
   },
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware().concat(apiSlice.middleware),
 });
 
 export type AppDispatch = typeof store.dispatch;
