@@ -22,7 +22,6 @@ export default class UsersApi extends MongoDataSource<User> {
   protected collection: Collection<Document>;
 
   public async getUser(userId: ObjectId) {
-    console.log('info', this);
     return this.findOneById(userId, {ttl: USER_REFRESH_TIME});
   }
 
@@ -113,7 +112,7 @@ export default class UsersApi extends MongoDataSource<User> {
     const userPromise = this.getUser(userId);
     const feed: Partial<Feed> = {
       url,
-      _id: new ObjectId() as any,
+      _id: new ObjectId().toString(),
       ...(await (rssUrl
         ? feedApi.getFeedInfoFromRssUrl(rssUrl)
         : feedApi.getFeedInfoFromUrl(url))),

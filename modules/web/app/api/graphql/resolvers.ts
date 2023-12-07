@@ -28,7 +28,7 @@ const usersApi = new UsersApi({
   modelOrCollection: mongoClient.db().collection('users'),
 });
 
-type RequestContext = {userId?: any};
+type RequestContext = {userId: ObjectId};
 
 export const resolvers: ApolloServerOptionsWithTypeDefs<RequestContext>['resolvers'] =
   {

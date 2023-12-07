@@ -19,25 +19,22 @@ const server = new ApolloServer({
   plugins: [logger],
 });
 
-const handler = startServerAndCreateNextHandler<NextRequest, {userId?: any}>(
-  server,
-  {
-    context: async (req, res) => {
-      const token = req.headers.get('authorization')?.split('Bearer ')[1] ?? '';
-      console.log('token is', token);
-      if (!token) {
-        return {req, res};
-      }
-      let rawToken: JWTToken = jwt.verify(
-        token,
-        process.env.JWT_SIGNING!,
-      ) as JWTToken;
+const handler = startServerAndCreateNextHandler<
+  NextRequest,
+  {userId: ObjectId}
+>(server, {
+  context: async (req, res) => {
+    const token = req.headers.get('authorization')?.split('Bearer ')[1] ?? '';
+    if (!token) {
+      return {req, res, userId: new ObjectId('')};
+    }
+    let rawToken: JWTToken = jwt.verify(
+      token,
+      process.env.JWT_SIGNING!,
+    ) as JWTToken;
 
-      console.log('have id', rawToken?.userId);
-
-      return {req, res, userId: new ObjectId(rawToken?.userId)};
-    },
+    return {req, res, userId: new ObjectId(rawToken?.userId)};
   },
-);
+});
 
 export {handler as GET, handler as POST};
