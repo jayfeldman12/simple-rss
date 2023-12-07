@@ -134,13 +134,16 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
           onSubmit={addFeed}
           error={!!addFeedError}
         />
-        <Link href={'/feeds'}>
+        <Link href={'/feeds'} className="no-text-change">
           <p>All feeds</p>
         </Link>
         {feeds?.map(feed => {
           const unread = unreadCount[feed._id];
           return (
-            <Link key={feed._id} href={`/feeds/${feed._id}`}>
+            <Link
+              key={feed._id}
+              href={`/feeds/${feed._id}`}
+              className="no-text-change">
               <div
                 className="d-flex flex-row my-1 align-self-stretch align-items-center justify-content-between"
                 style={{cursor: 'pointer'}}>

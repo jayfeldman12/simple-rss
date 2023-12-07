@@ -8,6 +8,7 @@ body {
 
 a:link {
   color: #5b5494;
+  text-decoration: none;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -16,7 +17,7 @@ a:link {
   }
 }
 
-a.no-text-change {
+.no-text-change {
   text-decoration: none;
   color: inherit;
 }
