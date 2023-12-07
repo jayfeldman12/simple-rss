@@ -1,5 +1,3 @@
-import {PluginDefinition} from 'apollo-server-core';
-
 export const Logger = {
   info: (...message: any) => {
     console.info(...message, new Date().toUTCString());
@@ -14,9 +12,9 @@ export const Logger = {
   },
 };
 
-export const logger: PluginDefinition = {
+export const logger = {
   // Fires whenever a GraphQL request is received from a client.
-  async requestDidStart(requestContext) {
+  async requestDidStart() {
     Logger.log('Request started!');
 
     return {
@@ -36,8 +34,8 @@ export const logger: PluginDefinition = {
         Logger.log('Response sent', new Date().toUTCString());
       },
 
-      async didEncounterErrors(errorContext) {
-        Logger.error('Found an error', errorContext.errors);
+      async didEncounterErrors(args: unknown) {
+        Logger.error('Found an error', args);
       },
     };
   },

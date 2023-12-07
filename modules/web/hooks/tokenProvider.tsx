@@ -1,3 +1,5 @@
+'use client';
+
 import React, {
   createContext,
   useCallback,
@@ -5,25 +7,30 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import {TOKEN_LOCAL_STORAGE} from '../pages/api/graphql/consts';
+import {TOKEN_LOCAL_STORAGE} from '../app/api/graphql/consts';
 
 export interface TokenProvider {
   token: string;
   clearToken: () => void;
   setNewToken: (newToken: string) => void;
+  hasFetched: boolean;
 }
 
 const TokenContext = createContext<TokenProvider>({
   token: '',
   setNewToken: () => null,
   clearToken: () => null,
+  hasFetched: false,
 });
 
 export const TokenProvider = ({children}: {children: React.ReactNode}) => {
   const [token, setToken] = useState('');
+  const [hasFetched, setHasFetched] = useState(false);
+
   useEffect(() => {
     const storageToken = localStorage.getItem(TOKEN_LOCAL_STORAGE);
     if (storageToken) setToken(storageToken);
+    setHasFetched(true);
   }, []);
 
   const clearToken = useCallback(
@@ -37,7 +44,7 @@ export const TokenProvider = ({children}: {children: React.ReactNode}) => {
   }, []);
 
   return (
-    <TokenContext.Provider value={{token, clearToken, setNewToken}}>
+    <TokenContext.Provider value={{token, clearToken, setNewToken, hasFetched}}>
       {children}
     </TokenContext.Provider>
   );

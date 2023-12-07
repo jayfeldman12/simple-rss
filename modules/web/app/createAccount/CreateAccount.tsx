@@ -1,14 +1,13 @@
+'use client';
+
+import {useRouter} from 'next/navigation';
 import {useCallback, useState} from 'react';
-import {useMutation} from '@tanstack/react-query';
-import {MutationCreateUserArgs} from '../pages/api/graphql/models/types';
-import {graphqlRequest} from '../graphqlRequest';
-import {CreateUser} from '../queries/userQueries';
 import Form from 'react-bootstrap/Form';
-import {PageHead} from '../components/common/pageHead';
-import {Background} from '../components/common/background';
-import SubmitButton from '../components/common/SubmitButton';
-import {useRouter} from 'next/router';
-import {useTokenContext} from '../hooks/tokenProvider';
+import SubmitButton from '../../components/common/SubmitButton';
+import {Background} from '../../components/common/background';
+import {PageHead} from '../../components/common/pageHead';
+import {useTokenContext} from '../../hooks/tokenProvider';
+import {useCreateAccount} from '../../queries/apis';
 
 const CreateAccountPage = ({}) => {
   const [username, setUsername] = useState('');
@@ -29,9 +28,16 @@ const CreateAccountPage = ({}) => {
     mutate: createAccount,
     isLoading,
     error,
-  } = useMutation((variables: MutationCreateUserArgs) =>
-    graphqlRequest(CreateUser, {...variables}),
-  );
+  } = useCreateAccount({
+    onSuccess: ({token}) => {
+      if (token) {
+        setNewToken(token);
+        onCreateAccountSuccess();
+      } else {
+        throw new Error('Token missing from create account');
+      }
+    },
+  });
 
   const onCreateAccount = useCallback(async () => {
     if (!username || !password) return;
@@ -40,28 +46,8 @@ const CreateAccountPage = ({}) => {
       return;
     }
     if (confirmError) setConfirmError('');
-    createAccount(
-      {username, password},
-      {
-        onSuccess: ({createUser: {token}}) => {
-          if (token) {
-            setNewToken(token);
-            onCreateAccountSuccess();
-          } else {
-            throw new Error('Token missing from create account');
-          }
-        },
-      },
-    );
-  }, [
-    confirmError,
-    confirmPassword,
-    createAccount,
-    onCreateAccountSuccess,
-    password,
-    setNewToken,
-    username,
-  ]);
+    createAccount({username, password});
+  }, [confirmError, confirmPassword, createAccount, password, username]);
 
   return (
     <div>

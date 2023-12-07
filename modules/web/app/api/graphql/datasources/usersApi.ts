@@ -1,9 +1,9 @@
 import {Collection, MongoDataSource} from 'apollo-datasource-mongodb';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import {Document} from 'mongoose';
 import {ObjectId} from 'mongodb';
-import {User, WithUserId} from '../models/users';
+import {Document} from 'mongoose';
+import {USER_REFRESH_TIME} from '../../../../utils/consts';
 import {
   CreateUserResponse,
   Feed,
@@ -12,16 +12,17 @@ import {
   Maybe,
   MutationMarkReadArgs,
 } from '../models/types';
+import {User, WithUserId} from '../models/users';
 import {FeedApi} from './feedApi';
-import {USER_REFRESH_TIME} from '../../../../utils/consts';
 
 export default class UsersApi extends MongoDataSource<User> {
   protected INVALID_CREDENTIALS = 'Invalid credentials';
 
-  // @ts-expect-error not uninitialized, it's assigned in the super
+  // @ts-expect-error not uninitialized, it's assigned in the super. Declaring here to override type
   protected collection: Collection<Document>;
 
   public async getUser(userId: ObjectId) {
+    console.log('info', this);
     return this.findOneById(userId, {ttl: USER_REFRESH_TIME});
   }
 

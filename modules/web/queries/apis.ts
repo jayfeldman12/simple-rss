@@ -1,24 +1,28 @@
-import {graphqlRequest} from '../graphqlRequest';
+import {
+  QueryKey,
+  UseMutationOptions,
+  UseQueryOptions,
+  useMutation,
+  useQuery,
+} from '@tanstack/react-query';
 import {
   AddFeedResponse,
+  CreateUserResponse,
   DeleteFeedResponse,
   DeleteUserResponse,
   Feed,
+  LoginResponse,
   MarkReadResponse,
   MutationAddFeedArgs,
+  MutationCreateUserArgs,
   MutationDeleteFeedArgs,
+  MutationLoginArgs,
   MutationMarkReadArgs,
-} from '../pages/api/graphql/models/types';
+} from '../app/api/graphql/models/types';
+import {graphqlRequest} from '../graphqlRequest';
 import {APP_FEED_REFRESH_TIME} from '../utils/consts';
 import {FeedQuery, MarkRead} from './feedQueries';
-import {AddFeed, DeleteFeed, DeleteUser} from './userQueries';
-import {
-  QueryKey,
-  useQuery,
-  useMutation,
-  UseMutationOptions,
-  UseQueryOptions,
-} from '@tanstack/react-query';
+import {AddFeed, DeleteFeed, DeleteUser, Login} from './userQueries';
 
 type FeedResponse = {
   feeds: Feed[];
@@ -30,6 +34,15 @@ type GetFeedOptions = {
   isSidebar?: boolean;
 };
 
+type MutationOptions<Response, Args> =
+  | Omit<UseMutationOptions<Response, Error, Args, unknown>, 'mutationFn'>
+  | undefined;
+
+type QueryOptions<Response> = Omit<
+  UseQueryOptions<Response, Error, Response, QueryKey>,
+  'queryKey' | 'queryFn' | 'initialData'
+>;
+
 export const getFeedKey = (token?: string, options?: GetFeedOptions) => [
   'getFeeds',
   token,
@@ -39,10 +52,7 @@ export const getFeedKey = (token?: string, options?: GetFeedOptions) => [
 export const useGetFeeds = (
   token?: string,
   feedOptions: GetFeedOptions = {},
-  options?: Omit<
-    UseQueryOptions<FeedResponse, Error, FeedResponse, QueryKey>,
-    'queryKey' | 'queryFn' | 'initialData'
-  >,
+  options?: QueryOptions<FeedResponse>,
 ) => {
   const {fetchAll, feedId} = feedOptions;
   return useQuery<FeedResponse, Error>(
@@ -57,37 +67,18 @@ export const useGetFeeds = (
 };
 
 export const useMarkRead = (
-  options?:
-    | Omit<
-        UseMutationOptions<
-          MarkReadResponse,
-          Error,
-          MutationMarkReadArgs,
-          unknown
-        >,
-        'mutationFn'
-      >
-    | undefined,
+  options?: MutationOptions<MarkReadResponse, MutationMarkReadArgs>,
 ) => {
   return useMutation(
+    ['markRead'],
     (variables: MutationMarkReadArgs) =>
-      graphqlRequest(MarkRead, {...variables}),
+      graphqlRequest<MarkReadResponse>(MarkRead, {...variables}),
     options,
   );
 };
 
 export const useAddFeed = (
-  options?:
-    | Omit<
-        UseMutationOptions<
-          AddFeedResponse,
-          Error,
-          MutationAddFeedArgs,
-          unknown
-        >,
-        'mutationFn'
-      >
-    | undefined,
+  options?: MutationOptions<AddFeedResponse, MutationAddFeedArgs>,
 ) => {
   return useMutation<AddFeedResponse, Error, MutationAddFeedArgs>(
     async (variables: MutationAddFeedArgs) =>
@@ -97,32 +88,37 @@ export const useAddFeed = (
 };
 
 export const useDeleteFeed = (
-  options?:
-    | Omit<
-        UseMutationOptions<
-          DeleteFeedResponse,
-          Error,
-          MutationDeleteFeedArgs,
-          unknown
-        >,
-        'mutationFn'
-      >
-    | undefined,
+  options?: MutationOptions<DeleteFeedResponse, MutationDeleteFeedArgs>,
 ) => {
   return useMutation(
     (variables: MutationDeleteFeedArgs) =>
-      graphqlRequest(DeleteFeed, {...variables}),
+      graphqlRequest<DeleteFeedResponse>(DeleteFeed, {...variables}),
     options,
   );
 };
 
 export const useDeleteUser = (
-  options?:
-    | Omit<
-        UseMutationOptions<DeleteUserResponse, Error, void, unknown>,
-        'mutationFn'
-      >
-    | undefined,
+  options?: MutationOptions<DeleteUserResponse, void>,
 ) => {
-  return useMutation(() => graphqlRequest(DeleteUser, options));
+  return useMutation(() => graphqlRequest(DeleteUser, {}));
+};
+
+export const useLogin = (
+  options?: MutationOptions<LoginResponse, MutationLoginArgs>,
+) => {
+  return useMutation<LoginResponse, Error, MutationLoginArgs>(
+    async (variables: MutationLoginArgs) =>
+      graphqlRequest(Login, {...variables}),
+    options,
+  );
+};
+
+export const useCreateAccount = (
+  options?: MutationOptions<CreateUserResponse, MutationCreateUserArgs>,
+) => {
+  return useMutation<CreateUserResponse, Error, MutationCreateUserArgs>(
+    async (variables: MutationCreateUserArgs) =>
+      graphqlRequest(Login, {...variables}),
+    options,
+  );
 };

@@ -1,14 +1,17 @@
-import {request, RequestDocument} from 'graphql-request';
-import {TOKEN_LOCAL_STORAGE} from './pages/api/graphql/consts';
+import {request, RequestDocument, Variables} from 'graphql-request';
+import {TOKEN_LOCAL_STORAGE} from './app/api/graphql/consts';
 
 const ENDPOINT = '/api/graphql';
 
-export const graphqlRequest = (query: RequestDocument, variables: unknown) => {
+export const graphqlRequest = <R>(
+  query: RequestDocument,
+  variables: Variables,
+) => {
   const token = localStorage.getItem(TOKEN_LOCAL_STORAGE);
   const headers: Record<string, string> = {};
   if (token) {
     headers.authorization = `Bearer ${token}`;
   }
 
-  return request(ENDPOINT, query, variables, headers);
+  return request<R>(ENDPOINT, query, variables, headers);
 };

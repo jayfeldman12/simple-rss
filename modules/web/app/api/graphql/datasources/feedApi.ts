@@ -1,4 +1,4 @@
-import {RESTDataSource} from 'apollo-datasource-rest';
+import {RESTDataSource} from '@apollo/datasource-rest';
 import {Feed, FeedItem} from '../models/types';
 
 import {JSDOM} from 'jsdom';
@@ -22,7 +22,7 @@ export class FeedApi extends RESTDataSource {
   ): Promise<FeedItem[]> => {
     return this.feedCache.getCacheOrFetch(feedId, async () => {
       const rawResponse = await this.withTimeout(
-        this.get(rssUrl, undefined, {cacheOptions: {ttl: FEED_REFRESH_TTL}}),
+        this.get(rssUrl, {cacheOptions: {ttl: FEED_REFRESH_TTL}}),
       );
       const result = await new RssParser().parseString(rawResponse);
       return result.items
@@ -66,7 +66,7 @@ export class FeedApi extends RESTDataSource {
     const fixedUrl = url.includes('http') ? url : 'https://' + url;
     const origin = new URL(fixedUrl).origin;
     const siteText = await this.withTimeout(
-      this.get(origin, undefined, {cacheOptions: {ttl: ONE_DAY}}),
+      this.get(origin, {cacheOptions: {ttl: ONE_DAY}}),
     );
     const document = new JSDOM(siteText).window.document;
     const rssUrl =
@@ -101,7 +101,7 @@ export class FeedApi extends RESTDataSource {
     rssUrl: string,
   ): Promise<Partial<Feed>> => {
     const response = await this.withTimeout(
-      this.get(rssUrl, undefined, {cacheOptions: {ttl: FEED_REFRESH_TTL}}),
+      this.get(rssUrl, {cacheOptions: {ttl: FEED_REFRESH_TTL}}),
     );
     const result = await new RssParser().parseString(response);
     return {

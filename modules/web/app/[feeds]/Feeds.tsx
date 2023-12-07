@@ -1,17 +1,20 @@
+'use client';
+
+import {useRouter, useSearchParams} from 'next/navigation';
 import {useCallback} from 'react';
 import Row from 'react-bootstrap/Row';
+import {Spinner} from '../../components/common/Spinner';
 import {Background} from '../../components/common/background';
 import {PageHead} from '../../components/common/pageHead';
-import {Spinner} from '../../components/common/Spinner';
+import {Sidebar} from '../../components/feedComponents/Sidebar';
 import FeedCard from '../../components/feedComponents/feedCard';
 import {useFeeds} from '../../hooks/useFeeds';
-import {useRouter} from 'next/router';
-import {Sidebar} from '../../components/feedComponents/Sidebar';
 
 const FeedsPage = () => {
   const router = useRouter();
   const logOut = useCallback(() => router.push('/login'), [router]);
-  const feedId = router.query?.feeds?.[0];
+  const searchParams = useSearchParams();
+  const feedId = searchParams?.get('feeds')?.[0];
 
   const {
     errorMessage,

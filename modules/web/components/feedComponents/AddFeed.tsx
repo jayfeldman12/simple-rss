@@ -1,4 +1,6 @@
-import React, {useState} from 'react';
+'use client';
+
+import {useState} from 'react';
 import Form from 'react-bootstrap/Form';
 import SubmitButton from '../common/SubmitButton';
 

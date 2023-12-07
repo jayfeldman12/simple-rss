@@ -1,22 +1,24 @@
-import React, {useCallback, useMemo, useState} from 'react';
+'use client';
 
+import {useCallback, useMemo, useState} from 'react';
+
+import {useQueryClient} from '@tanstack/react-query';
+import Link from 'next/link';
+import {useRouter, useSearchParams} from 'next/navigation';
 import Button from 'react-bootstrap/Button';
+import {MutationMarkReadArgs} from '../../app/api/graphql/models/types';
 import SubmitButton from '../../components/common/SubmitButton';
 import {AddFeed} from '../../components/feedComponents/AddFeed';
-import Link from 'next/link';
-import {useRouter} from 'next/router';
 import {useTokenContext} from '../../hooks/tokenProvider';
+import {useWindowDimensions} from '../../hooks/useWindowDimensions';
 import {
-  useMarkRead,
+  getFeedKey,
   useAddFeed,
   useDeleteFeed,
   useDeleteUser,
   useGetFeeds,
-  getFeedKey,
+  useMarkRead,
 } from '../../queries/apis';
-import {useQueryClient} from '@tanstack/react-query';
-import {MutationMarkReadArgs} from '../../pages/api/graphql/models/types';
-import {useWindowDimensions} from '../../hooks/useWindowDimensions';
 
 interface SidebarProps {
   showFetchAll: boolean;
@@ -31,10 +33,11 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
   const {windowHeight} = useWindowDimensions();
 
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const logOut = useCallback(() => router.replace('login'), [router]);
   const {token, clearToken} = useTokenContext();
-  const feedId = router.query?.feeds?.[0];
+  const feedId = searchParams?.get('feeds')?.[0];
 
   const onLogOut = useCallback(() => {
     clearToken();
@@ -101,7 +104,7 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
       })),
     };
     markRead(request, {
-      onSuccess: refetchFeeds,
+      onSuccess: () => refetchFeeds(),
     });
   }, [feeds, markRead, refetchFeeds]);
 

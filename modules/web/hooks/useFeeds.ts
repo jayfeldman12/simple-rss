@@ -1,7 +1,9 @@
+'use client';
+
 import {useQueryClient} from '@tanstack/react-query';
 import {useEffect, useMemo, useState} from 'react';
+import {FeedItem} from '../app/api/graphql/models/types';
 import {Errors} from '../errors';
-import {FeedItem} from '../pages/api/graphql/models/types';
 import {getFeedKey, useGetFeeds, useMarkRead} from '../queries/apis';
 import {useTokenContext} from './tokenProvider';
 

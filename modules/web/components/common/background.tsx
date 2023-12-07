@@ -1,4 +1,5 @@
-import {useState, useEffect} from 'react';
+'use client';
+
 import {useWindowDimensions} from '../../hooks/useWindowDimensions';
 
 export interface BackgroundProps {

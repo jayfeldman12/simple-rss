@@ -1,14 +1,13 @@
-import {useMutation} from '@tanstack/react-query';
-import {useRouter} from 'next/router';
+'use client';
+
+import {useRouter} from 'next/navigation';
 import {useCallback, useState} from 'react';
 import Form from 'react-bootstrap/Form';
-import SubmitButton from '../components/common/SubmitButton';
-import {Background} from '../components/common/background';
-import {PageHead} from '../components/common/pageHead';
-import {graphqlRequest} from '../graphqlRequest';
-import {useTokenContext} from '../hooks/tokenProvider';
-import {MutationLoginArgs} from '../pages/api/graphql/models/types';
-import {Login} from '../queries/userQueries';
+import SubmitButton from '../../components/common/SubmitButton';
+import {Background} from '../../components/common/background';
+import {PageHead} from '../../components/common/pageHead';
+import {useTokenContext} from '../../hooks/tokenProvider';
+import {useLogin} from '../../queries/apis';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -27,26 +26,21 @@ const LoginPage = () => {
     mutate: login,
     isLoading,
     error,
-  } = useMutation((variables: MutationLoginArgs) =>
-    graphqlRequest(Login, {...variables}),
-  );
+  } = useLogin({
+    onSuccess: ({token}) => {
+      if (token) {
+        setNewToken(token);
+        onLoginSuccess();
+      } else {
+        throw new Error('Token missing from login');
+      }
+    },
+  });
 
   const onLogin = useCallback(async () => {
     if (!username || !password) return;
-    login(
-      {username, password},
-      {
-        onSuccess: ({login: {token}}) => {
-          if (token) {
-            setNewToken(token);
-            onLoginSuccess();
-          } else {
-            throw new Error('Token missing from login');
-          }
-        },
-      },
-    );
-  }, [login, onLoginSuccess, password, setNewToken, username]);
+    login({username, password});
+  }, [login, password, username]);
 
   return (
     <div>

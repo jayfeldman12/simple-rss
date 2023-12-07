@@ -13,14 +13,20 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "pages/api/graphql/index.ts",
-    "pages/api/graphql/schema.qs"
+    "app/api/graphql/route.ts",
+    "app/api/graphql/schema.qs",
+    ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

@@ -1,7 +1,7 @@
 import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import {FaExternalLinkAlt} from 'react-icons/fa';
-import {FeedItem} from '../../pages/api/graphql/models/types';
+import {FeedItem} from '../../app/api/graphql/models/types';
 
 interface FeedCardProps {
   item: FeedItem;
