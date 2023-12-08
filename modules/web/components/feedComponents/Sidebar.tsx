@@ -9,7 +9,7 @@ import Button from 'react-bootstrap/Button';
 import {MutationMarkReadArgs} from '../../app/api/graphql/models/types';
 import SubmitButton from '../../components/common/SubmitButton';
 import {AddFeed} from '../../components/feedComponents/AddFeed';
-import {useTokenContext} from '../../hooks/tokenProvider';
+import {useTokenContext} from '../../context/tokenProvider';
 import {useWindowDimensions} from '../../hooks/useWindowDimensions';
 import {
   getFeedKey,

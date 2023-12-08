@@ -6,7 +6,7 @@ import Form from 'react-bootstrap/Form';
 import SubmitButton from '../../components/common/SubmitButton';
 import {Background} from '../../components/common/background';
 import {PageHead} from '../../components/common/pageHead';
-import {useTokenContext} from '../../hooks/tokenProvider';
+import {useTokenContext} from '../../context/tokenProvider';
 import {useCreateAccount} from '../../queries/apis';
 
 const CreateAccountPage = ({}) => {

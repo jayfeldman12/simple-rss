@@ -1,7 +1,7 @@
 'use client';
 
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
-import {TokenProvider} from '../hooks/tokenProvider';
+import {TokenProvider} from '../context/tokenProvider';
 import {APP_FEED_REFRESH_TIME} from '../utils/consts';
 
 const queryClient = new QueryClient({

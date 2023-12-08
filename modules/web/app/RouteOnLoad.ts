@@ -2,7 +2,7 @@
 
 import {useRouter} from 'next/navigation';
 import {useEffect} from 'react';
-import {useTokenContext} from '../hooks/tokenProvider';
+import {useTokenContext} from '../context/tokenProvider';
 
 const RouteOnLoad = () => {
   const router = useRouter();

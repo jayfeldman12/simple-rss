@@ -8,7 +8,7 @@ import {Background} from '../../components/common/background';
 import {PageHead} from '../../components/common/pageHead';
 import {Sidebar} from '../../components/feedComponents/Sidebar';
 import FeedCard from '../../components/feedComponents/feedCard';
-import {useFeeds} from '../../hooks/useFeeds';
+import {useFeeds} from './useFeeds';
 
 const FeedsPage = () => {
   const router = useRouter();

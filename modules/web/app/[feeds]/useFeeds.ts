@@ -2,10 +2,10 @@
 
 import {useQueryClient} from '@tanstack/react-query';
 import {useEffect, useMemo, useState} from 'react';
-import {FeedItem} from '../app/api/graphql/models/types';
-import {Errors} from '../errors';
-import {getFeedKey, useGetFeeds, useMarkRead} from '../queries/apis';
-import {useTokenContext} from './tokenProvider';
+import {useTokenContext} from '../../context/tokenProvider';
+import {Errors} from '../../errors';
+import {getFeedKey, useGetFeeds, useMarkRead} from '../../queries/apis';
+import {FeedItem} from '../api/graphql/models/types';
 
 export const useFeeds = (onLogout: () => void, feedId?: string) => {
   const {token} = useTokenContext();
