@@ -33,6 +33,8 @@ const FeedsPage = () => {
     showFetchAll,
     totalUnreadCount,
     unreadCountByFeed,
+    markAllRead,
+    feedList,
     refetchFeeds,
   } = useFeeds(logOut, feedId);
 
@@ -45,9 +47,10 @@ const FeedsPage = () => {
             showFetchAll={showFetchAll}
             onPressFetchAll={() => setFetchAll(true)}
             feedId={feedId}
-            refetchFeeds={refetchFeeds}
+            markAllRead={markAllRead}
             unreadCountByFeed={unreadCountByFeed}
-            feeds={feeds}
+            feeds={feedList}
+            refetchFeeds={refetchFeeds}
           />
           {/* Main body */}
           <div className="col px-5 py-4">

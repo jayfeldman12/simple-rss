@@ -4,8 +4,13 @@ import {useMemo} from 'react';
 import {useGetFeed, useGetFeeds, useListFeeds} from '../queries/apis';
 
 export const useFetchFeeds = (feedId?: string, fetchAll?: boolean) => {
-  const {data: feedList, isLoading: listLoading, refetch} = useListFeeds();
-  const feedIds = feedList?.feeds?.map(f => f._id) ?? [];
+  const {
+    data: feedListResponse,
+    isLoading: listLoading,
+    refetch,
+  } = useListFeeds();
+  const feedList = feedListResponse?.feeds;
+  const feedIds = feedList?.map(f => f._id) ?? [];
 
   const {
     data: {feeds: feed} = {},
@@ -99,5 +104,6 @@ export const useFetchFeeds = (feedId?: string, fetchAll?: boolean) => {
     items,
     unreadCountByFeed,
     totalUnreadCount,
+    feedList,
   };
 };

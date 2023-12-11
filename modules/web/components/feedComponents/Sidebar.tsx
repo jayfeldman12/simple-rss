@@ -6,26 +6,26 @@ import {useQueryClient} from '@tanstack/react-query';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import Button from 'react-bootstrap/Button';
-import {Feed, MutationMarkReadArgs} from '../../app/api/graphql/models/types';
 import SubmitButton from '../../components/common/SubmitButton';
 import {AddFeed} from '../../components/feedComponents/AddFeed';
 import {useTokenContext} from '../../context/tokenProvider';
 import {useWindowDimensions} from '../../hooks/useWindowDimensions';
 import {
+  FeedListResponse,
   getFeedKey,
   useAddFeed,
   useDeleteFeed,
   useDeleteUser,
-  useMarkRead,
 } from '../../queries/apis';
 
 interface SidebarProps {
   showFetchAll: boolean;
   onPressFetchAll: () => void;
   feedId?: string;
-  feeds: Feed[];
+  feeds?: FeedListResponse['feeds'];
   unreadCountByFeed: Record<string, number>;
   refetchFeeds: () => void;
+  markAllRead: () => void;
 }
 
 const buttonHeight = '2.5rem';
@@ -37,6 +37,7 @@ export const Sidebar = ({
   feeds,
   unreadCountByFeed,
   refetchFeeds,
+  markAllRead,
 }: SidebarProps) => {
   const [showReallyDelete, setShowReallyDelete] = useState(false);
   const queryClient = useQueryClient();
@@ -52,7 +53,6 @@ export const Sidebar = ({
     logOut();
   }, [clearToken, logOut]);
 
-  const {mutate: markRead} = useMarkRead();
   const {
     mutate: addFeedByUrl,
     isLoading: addingFeed,
@@ -84,19 +84,6 @@ export const Sidebar = ({
     () => feeds?.find(feed => feed._id.toString() === feedId),
     [feedId, feeds],
   );
-
-  const markAllRead = useCallback(() => {
-    if (!feeds) return;
-    const request: MutationMarkReadArgs = {
-      feeds: feeds.map(feed => ({
-        id: feed._id,
-        feedItemIds: feed.feedItems.map(item => item.id),
-      })),
-    };
-    markRead(request, {
-      onSuccess: () => refetchFeeds(),
-    });
-  }, [feeds, markRead, refetchFeeds]);
 
   return (
     <div

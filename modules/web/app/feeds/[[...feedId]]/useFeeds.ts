@@ -1,11 +1,11 @@
 'use client';
 
 import {useQueryClient} from '@tanstack/react-query';
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {Errors} from '../../../errors';
 import {useFetchFeeds} from '../../../hooks/useFetchFeeds';
 import {getFeedKey, useMarkRead} from '../../../queries/apis';
-import {FeedItem} from '../../api/graphql/models/types';
+import {FeedItem, MutationMarkReadArgs} from '../../api/graphql/models/types';
 
 export const useFeeds = (onLogout: () => void, feedId?: string) => {
   const [fetchAll, setFetchAll] = useState(!!feedId);
@@ -20,6 +20,7 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
     totalUnreadCount,
     unreadCountByFeed,
     refetchFeeds,
+    feedList,
   } = useFetchFeeds(feedId, fetchAll);
 
   const {mutate: markRead} = useMarkRead();
@@ -59,6 +60,31 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
     }
   };
 
+  const markAllRead = useCallback(() => {
+    if (!feeds) return;
+    const request: MutationMarkReadArgs = {
+      feeds: feeds.map(feed => ({
+        id: feed._id,
+        feedItemIds: feed.feedItems.map(item => item.id),
+      })),
+    };
+
+    markRead(request);
+
+    const updatedFeeds = feeds.map(f => ({
+      ...f,
+      feedItems: f.feedItems.map(item => ({
+        ...item,
+        isRead: true,
+      })),
+    }));
+    updatedFeeds.forEach(f => {
+      queryClient.setQueryData(getFeedKey({feedId: f._id, fetchAll: false}), {
+        feeds: f,
+      });
+    });
+  }, [feeds, markRead, queryClient]);
+
   return {
     errorMessage,
     hasFetched,
@@ -71,6 +97,8 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
     showFetchAll: !fetchAll && !!feeds,
     totalUnreadCount,
     unreadCountByFeed,
+    markAllRead,
     refetchFeeds,
+    feedList,
   };
 };

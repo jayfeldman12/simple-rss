@@ -30,7 +30,7 @@ type FeedResponse = {
   feeds: Feed[];
 };
 
-type FeedListResponse = {
+export type FeedListResponse = {
   feeds: Array<{
     _id: string;
     icon: string;
