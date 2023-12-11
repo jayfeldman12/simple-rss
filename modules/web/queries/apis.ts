@@ -2,7 +2,9 @@ import {
   QueryKey,
   UseMutationOptions,
   UseQueryOptions,
+  UseQueryResult,
   useMutation,
+  useQueries,
   useQuery,
 } from '@tanstack/react-query';
 import {
@@ -11,7 +13,7 @@ import {
   DeleteFeedResponse,
   DeleteUserResponse,
   Feed,
-  LoginResponse,
+  LoginResponse as LoginResponseModel,
   MarkReadResponse,
   MutationAddFeedArgs,
   MutationCreateUserArgs,
@@ -21,17 +23,35 @@ import {
 } from '../app/api/graphql/models/types';
 import {graphqlRequest} from '../graphqlRequest';
 import {APP_FEED_REFRESH_TIME} from '../utils/consts';
-import {FeedQuery, MarkRead} from './feedQueries';
+import {FeedQuery, ListFeeds, MarkRead} from './feedQueries';
 import {AddFeed, DeleteFeed, DeleteUser, Login} from './userQueries';
 
 type FeedResponse = {
   feeds: Feed[];
 };
 
+type FeedListResponse = {
+  feeds: Array<{
+    _id: string;
+    icon: string;
+    title: string;
+  }>;
+};
+
+type LoginResponse = {
+  login: LoginResponseModel;
+};
+
 type GetFeedOptions = {
   fetchAll?: boolean;
   feedId?: string;
   isSidebar?: boolean;
+};
+
+type GetFeedsOptions = {
+  fetchAll?: boolean;
+  isSidebar?: boolean;
+  feedIds: string[];
 };
 
 type MutationOptions<Response, Args> =
@@ -51,6 +71,28 @@ export const getFeedKey = (token?: string, options?: GetFeedOptions) => [
 
 export const useGetFeeds = (
   token?: string,
+  feedOptions: GetFeedsOptions = {feedIds: []},
+  options?: QueryOptions<FeedResponse>,
+) => {
+  const {fetchAll, feedIds} = feedOptions;
+  return useQueries({
+    queries: feedIds.map(feedId => [
+      {
+        queryKey: [getFeedKey(token, feedOptions)],
+        queryFn: () =>
+          graphqlRequest<Feed>(FeedQuery, {onlyUnread: !fetchAll, feedId}),
+        options: {
+          refetchInterval: APP_FEED_REFRESH_TIME + 10, // make sure it's not marked as stale
+          refetchIntervalInBackground: true,
+          ...options,
+        },
+      },
+    ]),
+  }) as UseQueryResult<Feed[], Error>[];
+};
+
+export const useGetFeed = (
+  token?: string,
   feedOptions: GetFeedOptions = {},
   options?: QueryOptions<FeedResponse>,
 ) => {
@@ -58,6 +100,21 @@ export const useGetFeeds = (
   return useQuery<FeedResponse, Error>(
     getFeedKey(token, feedOptions),
     () => graphqlRequest(FeedQuery, {onlyUnread: !fetchAll, feedId}),
+    {
+      refetchInterval: APP_FEED_REFRESH_TIME + 10, // make sure it's not marked as stale
+      refetchIntervalInBackground: true,
+      ...options,
+    },
+  );
+};
+
+export const useListFeeds = (
+  token?: string,
+  options?: QueryOptions<FeedListResponse>,
+) => {
+  return useQuery<FeedListResponse, Error>(
+    getFeedKey(token),
+    () => graphqlRequest(ListFeeds, {}),
     {
       refetchInterval: APP_FEED_REFRESH_TIME + 10, // make sure it's not marked as stale
       refetchIntervalInBackground: true,

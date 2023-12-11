@@ -4,7 +4,13 @@ import {useQueryClient} from '@tanstack/react-query';
 import {useEffect, useMemo, useState} from 'react';
 import {useTokenContext} from '../../context/tokenProvider';
 import {Errors} from '../../errors';
-import {getFeedKey, useGetFeeds, useMarkRead} from '../../queries/apis';
+import {
+  getFeedKey,
+  useGetFeed,
+  useGetFeeds,
+  useListFeeds,
+  useMarkRead,
+} from '../../queries/apis';
 import {FeedItem} from '../api/graphql/models/types';
 
 export const useFeeds = (onLogout: () => void, feedId?: string) => {
@@ -12,13 +18,42 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
   const [fetchAll, setFetchAll] = useState(!!feedId);
   const [locallyRead, setLocallyRead] = useState<string[]>([]);
   const queryClient = useQueryClient();
+  const {data: feedList} = useListFeeds(token, {enabled: fetchAll});
+  console.log('list before', feedList);
+  const feedIds = feedList?.feeds?.map(f => f._id) ?? [];
+  console.log('list after', feedIds);
 
   const {
-    data: {feeds} = {},
-    isSuccess,
-    isFetching,
-    error,
-  } = useGetFeeds(token, {fetchAll, feedId});
+    data: {feeds: feed} = {},
+    isSuccess: isFeedSuccess,
+    isFetching: isFeedFetching,
+    error: feedError,
+  } = useGetFeed(token, {fetchAll, feedId}, {enabled: !!feedId});
+  const feedsResults = useGetFeeds(
+    token,
+    {fetchAll, feedIds},
+    {enabled: !feedId && !!feedIds?.length},
+  );
+
+  const {feeds, isFetching, error, isSuccess} = useMemo(() => {
+    if (feedId && feed?.length) {
+      return {
+        feeds: feed,
+        isFetching: isFeedFetching,
+        error: feedError,
+        isSuccess: isFeedSuccess,
+      };
+    }
+    if (feedsResults?.length) {
+      return {
+        feeds: feedsResults.flatMap(result => result.data ?? []),
+        isFetching: feedsResults.some(result => result.isLoading),
+        error: feedsResults.find(result => result.error)?.error,
+        isSuccess: feedsResults.every(result => result.isSuccess),
+      };
+    }
+    return {feeds: [], isFetching: false, error: undefined, isSuccess: false};
+  }, [feedId, feedsResults, feed, isFeedFetching, feedError, isFeedSuccess]);
 
   const {mutate: markRead} = useMarkRead();
 
@@ -31,7 +66,7 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
     if (!error || isFetching) {
       return '';
     }
-    if (error.message.includes(Errors.UNAUTHORIZED)) {
+    if (error.message?.includes(Errors.UNAUTHORIZED)) {
       onLogout();
       return;
     }
@@ -40,8 +75,8 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
 
   const items = useMemo(() => {
     if (feeds) {
-      const results = feeds.flatMap(feed =>
-        feed.feedItems.map(item => {
+      const results = feeds.flatMap(f =>
+        f.feedItems.map(item => {
           if (locallyRead.includes(item.id)) {
             item.isRead = true;
           }

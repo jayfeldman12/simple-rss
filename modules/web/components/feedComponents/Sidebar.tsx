@@ -17,6 +17,7 @@ import {
   useDeleteFeed,
   useDeleteUser,
   useGetFeeds,
+  useListFeeds,
   useMarkRead,
 } from '../../queries/apis';
 
@@ -44,10 +45,19 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
     logOut();
   }, [clearToken, logOut]);
 
-  const {data: {feeds} = {}, refetch: refetchFeeds} = useGetFeeds(token, {
-    fetchAll: false,
-    isSidebar: true,
-  });
+  const {data: feedList, refetch: refetchFeeds} = useListFeeds(token);
+  const feedIds = feedList?.feeds?.map(f => f._id) ?? [];
+
+  const feedsResults = useGetFeeds(
+    token,
+    {fetchAll: false, feedIds, isSidebar: true},
+    {enabled: !!feedIds?.length},
+  );
+
+  const feeds = useMemo(() => {
+    return feedsResults.flatMap(feed => feed.data ?? []) ?? [];
+  }, [feedsResults]);
+
   const {mutate: markRead} = useMarkRead();
   const {
     mutate: addFeedByUrl,

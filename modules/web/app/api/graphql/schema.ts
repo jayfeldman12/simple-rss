@@ -73,4 +73,10 @@ export const typeDefs = gql`
     title: String
     url: String!
   }
+
+  type User {
+    username: String!
+    _id: ID!
+    feeds: [FeedItem]!
+  }
 `;

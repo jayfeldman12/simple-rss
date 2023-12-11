@@ -21,19 +21,24 @@ const server = new ApolloServer({
 
 const handler = startServerAndCreateNextHandler<
   NextRequest,
-  {userId: ObjectId}
+  {userId?: ObjectId}
 >(server, {
   context: async (req, res) => {
+    console.log('calling context', req, 'nd now', res);
     const token = req.headers.get('authorization')?.split('Bearer ')[1] ?? '';
     if (!token) {
-      return {req, res, userId: new ObjectId('')};
+      return {req, res};
     }
     let rawToken: JWTToken = jwt.verify(
       token,
       process.env.JWT_SIGNING!,
     ) as JWTToken;
 
-    return {req, res, userId: new ObjectId(rawToken?.userId)};
+    if (!rawToken) {
+      return {req, res};
+    }
+
+    return {req, res, userId: new ObjectId(rawToken.userId)};
   },
 });
 

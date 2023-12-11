@@ -20,6 +20,16 @@ export const FeedQuery = gql`
   }
 `;
 
+export const ListFeeds = gql`
+  query ListFeeds {
+    feeds {
+      _id
+      icon
+      title
+    }
+  }
+`;
+
 export const MarkRead = gql`
   mutation MarkRead($feeds: [MarkReadFeed!]!) {
     markRead(feeds: $feeds) {

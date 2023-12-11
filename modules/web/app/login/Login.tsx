@@ -27,11 +27,14 @@ const LoginPage = () => {
     isLoading,
     error,
   } = useLogin({
-    onSuccess: ({token}) => {
+    onSuccess: res => {
+      const {token} = res.login;
+      console.log('finished', res);
       if (token) {
         setNewToken(token);
         onLoginSuccess();
       } else {
+        console.log('else throw');
         throw new Error('Token missing from login');
       }
     },

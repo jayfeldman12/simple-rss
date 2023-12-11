@@ -28,12 +28,17 @@ const usersApi = new UsersApi({
   modelOrCollection: mongoClient.db().collection('users'),
 });
 
-type RequestContext = {userId: ObjectId};
+type RequestContext = {userId?: ObjectId};
+
+const NOT_LOGGED_IN = 'Missing ID';
 
 export const resolvers: ApolloServerOptionsWithTypeDefs<RequestContext>['resolvers'] =
   {
     Query: {
       feeds: async (_parent, args, {userId}: RequestContext) => {
+        if (!userId) {
+          throw new Error(NOT_LOGGED_IN);
+        }
         Logger.log('Hitting get feeds');
         const response =
           (await usersApi.getUser(userId))?.feeds.filter(feed =>
@@ -52,26 +57,42 @@ export const resolvers: ApolloServerOptionsWithTypeDefs<RequestContext>['resolve
         _parent,
         {url, rssUrl}: MutationAddFeedArgs,
         {userId}: RequestContext,
-      ) => usersApi.addFeed(url, feedApi, userId, rssUrl),
+      ) => {
+        if (!userId) {
+          throw new Error(NOT_LOGGED_IN);
+        }
+        return usersApi.addFeed(url, feedApi, userId, rssUrl);
+      },
+
       deleteFeed: (
         _parent,
         {feedId}: MutationDeleteFeedArgs,
         {userId}: RequestContext,
-      ) => usersApi.deleteFeed(userId, new ObjectId(feedId)),
+      ) => {
+        if (!userId) {
+          throw new Error(NOT_LOGGED_IN);
+        }
+        return usersApi.deleteFeed(userId, new ObjectId(feedId));
+      },
       markRead: (
         _parent,
         args: MutationMarkReadArgs,
-        {userId: id}: RequestContext,
+        {userId}: RequestContext,
       ) => {
-        return usersApi.markRead({...args, userId: id});
+        if (!userId) {
+          throw new Error(NOT_LOGGED_IN);
+        }
+        return usersApi.markRead({...args, userId});
       },
       deleteUser: (_parent, _args, {userId}: RequestContext) => {
+        if (!userId) {
+          throw new Error(NOT_LOGGED_IN);
+        }
         return usersApi.deleteUser(userId);
       },
     },
     Feed: {
       feedItems: async (feed: Feed, args): Promise<FeedItem[]> => {
-        console.log('Starting get feed items');
         const response = await feedApi.getItemsFromFeed(feed, args.onlyUnread);
         return response;
       },

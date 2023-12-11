@@ -48,9 +48,7 @@ const FeedCard = ({item, onItemClick}: FeedCardProps) => {
             {item.description?.slice(0, 200)}
           </Card.Subtitle>
           <Card.Footer>
-            <a href={item.url}>
-              <FaExternalLinkAlt />
-            </a>
+            <FaExternalLinkAlt />
           </Card.Footer>
         </Card>
       </a>
