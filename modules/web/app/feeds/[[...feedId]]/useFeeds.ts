@@ -2,16 +2,16 @@
 
 import {useQueryClient} from '@tanstack/react-query';
 import {useEffect, useMemo, useState} from 'react';
-import {useTokenContext} from '../../context/tokenProvider';
-import {Errors} from '../../errors';
+import {useTokenContext} from '../../../context/tokenProvider';
+import {Errors} from '../../../errors';
 import {
   getFeedKey,
   useGetFeed,
   useGetFeeds,
   useListFeeds,
   useMarkRead,
-} from '../../queries/apis';
-import {FeedItem} from '../api/graphql/models/types';
+} from '../../../queries/apis';
+import {FeedItem} from '../../api/graphql/models/types';
 
 export const useFeeds = (onLogout: () => void, feedId?: string) => {
   const {token} = useTokenContext();
@@ -19,9 +19,7 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
   const [locallyRead, setLocallyRead] = useState<string[]>([]);
   const queryClient = useQueryClient();
   const {data: feedList} = useListFeeds(token, {enabled: fetchAll});
-  console.log('list before', feedList);
   const feedIds = feedList?.feeds?.map(f => f._id) ?? [];
-  console.log('list after', feedIds);
 
   const {
     data: {feeds: feed} = {},

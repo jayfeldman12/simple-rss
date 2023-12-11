@@ -24,7 +24,6 @@ const handler = startServerAndCreateNextHandler<
   {userId?: ObjectId}
 >(server, {
   context: async (req, res) => {
-    console.log('calling context', req, 'nd now', res);
     const token = req.headers.get('authorization')?.split('Bearer ')[1] ?? '';
     if (!token) {
       return {req, res};
