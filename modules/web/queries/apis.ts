@@ -45,12 +45,10 @@ type LoginResponse = {
 type GetFeedOptions = {
   fetchAll?: boolean;
   feedId?: string;
-  isSidebar?: boolean;
 };
 
 type GetFeedsOptions = {
   fetchAll?: boolean;
-  isSidebar?: boolean;
   feedIds: string[];
 };
 
@@ -63,25 +61,19 @@ type QueryOptions<Response> = Omit<
   'queryKey' | 'queryFn' | 'initialData'
 >;
 
-export const getFeedKey = (token?: string, options?: GetFeedOptions) => [
-  'getFeeds',
-  token,
-  options,
-];
+export const getFeedKey = (options?: GetFeedOptions) => ['getFeeds', options];
 
 export const useGetFeeds = (
-  token?: string,
   feedOptions: GetFeedsOptions = {feedIds: []},
   options?: QueryOptions<FeedResponse>,
 ) => {
   const {fetchAll, feedIds} = feedOptions;
   return useQueries({
-    queries: feedIds.map(feedId => getFeed(token, {fetchAll, feedId}, options)),
+    queries: feedIds.map(feedId => getFeed({fetchAll, feedId}, options)),
   }) as UseQueryResult<FeedResponse, Error>[];
 };
 
 export const useGetFeed = (
-  token?: string,
   feedOptions: GetFeedOptions = {},
   options?: QueryOptions<FeedResponse>,
 ) => {
@@ -89,19 +81,19 @@ export const useGetFeed = (
     queryKey,
     queryFn,
     options: queryOptions,
-  } = getFeed(token, feedOptions, options);
+  } = getFeed(feedOptions, options);
   return useQuery<FeedResponse, Error>(queryKey, queryFn, queryOptions);
 };
 
 const getFeed = (
-  token?: string,
   feedOptions: GetFeedOptions = {},
   options?: QueryOptions<FeedResponse>,
 ) => {
-  const {feedId} = feedOptions;
+  const {feedId, fetchAll} = feedOptions;
   return {
-    queryKey: getFeedKey(token, feedOptions),
-    queryFn: () => graphqlRequest<FeedResponse>(FeedQuery, {feedId}),
+    queryKey: getFeedKey(feedOptions),
+    queryFn: () =>
+      graphqlRequest<FeedResponse>(FeedQuery, {feedId, onlyUnread: !fetchAll}),
     options: {
       refetchInterval: APP_FEED_REFRESH_TIME + 10, // make sure it's not marked as stale
       refetchIntervalInBackground: true,
@@ -110,18 +102,11 @@ const getFeed = (
   };
 };
 
-export const useListFeeds = (
-  token?: string,
-  options?: QueryOptions<FeedListResponse>,
-) => {
+export const useListFeeds = (options?: QueryOptions<FeedListResponse>) => {
   return useQuery<FeedListResponse, Error>(
-    getFeedKey(token),
+    ['listFeeds'],
     () => graphqlRequest(ListFeeds, {}),
-    {
-      refetchInterval: APP_FEED_REFRESH_TIME + 10, // make sure it's not marked as stale
-      refetchIntervalInBackground: true,
-      ...options,
-    },
+    options,
   );
 };
 
@@ -159,7 +144,10 @@ export const useDeleteFeed = (
 export const useDeleteUser = (
   options?: MutationOptions<DeleteUserResponse, void>,
 ) => {
-  return useMutation(() => graphqlRequest(DeleteUser, {}));
+  return useMutation(
+    () => graphqlRequest<DeleteUserResponse>(DeleteUser, {}),
+    options,
+  );
 };
 
 export const useLogin = (

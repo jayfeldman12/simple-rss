@@ -4,9 +4,9 @@ import {useCallback, useMemo, useState} from 'react';
 
 import {useQueryClient} from '@tanstack/react-query';
 import Link from 'next/link';
-import {useRouter, useSearchParams} from 'next/navigation';
+import {useRouter} from 'next/navigation';
 import Button from 'react-bootstrap/Button';
-import {MutationMarkReadArgs} from '../../app/api/graphql/models/types';
+import {Feed, MutationMarkReadArgs} from '../../app/api/graphql/models/types';
 import SubmitButton from '../../components/common/SubmitButton';
 import {AddFeed} from '../../components/feedComponents/AddFeed';
 import {useTokenContext} from '../../context/tokenProvider';
@@ -16,47 +16,41 @@ import {
   useAddFeed,
   useDeleteFeed,
   useDeleteUser,
-  useGetFeeds,
-  useListFeeds,
   useMarkRead,
 } from '../../queries/apis';
 
 interface SidebarProps {
   showFetchAll: boolean;
   onPressFetchAll: () => void;
+  feedId?: string;
+  feeds: Feed[];
+  unreadCountByFeed: Record<string, number>;
+  refetchFeeds: () => void;
 }
 
 const buttonHeight = '2.5rem';
 
-export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
+export const Sidebar = ({
+  showFetchAll,
+  onPressFetchAll,
+  feedId,
+  feeds,
+  unreadCountByFeed,
+  refetchFeeds,
+}: SidebarProps) => {
   const [showReallyDelete, setShowReallyDelete] = useState(false);
   const queryClient = useQueryClient();
   const {windowHeight} = useWindowDimensions();
 
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const logOut = useCallback(() => router.replace('login'), [router]);
-  const {token, clearToken} = useTokenContext();
-  const feedId = searchParams?.get('feeds')?.[0];
+  const {clearToken} = useTokenContext();
 
   const onLogOut = useCallback(() => {
     clearToken();
     logOut();
   }, [clearToken, logOut]);
-
-  const {data: feedList, refetch: refetchFeeds} = useListFeeds(token);
-  const feedIds = feedList?.feeds?.map(f => f._id) ?? [];
-
-  const feedsResults = useGetFeeds(
-    token,
-    {fetchAll: false, feedIds, isSidebar: true},
-    {enabled: !!feedIds?.length},
-  );
-
-  const feeds = useMemo(() => {
-    return feedsResults.flatMap(result => result.data?.feeds ?? []) ?? [];
-  }, [feedsResults]);
 
   const {mutate: markRead} = useMarkRead();
   const {
@@ -81,7 +75,7 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
       {url},
       {
         onSuccess: () =>
-          queryClient.invalidateQueries({queryKey: getFeedKey(token)}),
+          queryClient.invalidateQueries({queryKey: getFeedKey()}),
       },
     );
   };
@@ -89,20 +83,6 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
   const activeFeed = useMemo(
     () => feeds?.find(feed => feed._id.toString() === feedId),
     [feedId, feeds],
-  );
-
-  const unreadCount = useMemo(
-    () =>
-      feeds?.reduce((acc, feed) => {
-        feed.feedItems.forEach(item => {
-          if (!item.isRead) {
-            acc[feed._id] = (acc[feed._id] ?? 0) + 1;
-          }
-        });
-
-        return acc;
-      }, {} as Record<string, string>) ?? {},
-    [feeds],
   );
 
   const markAllRead = useCallback(() => {
@@ -124,7 +104,7 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
       style={{minHeight: windowHeight}}>
       <div className="d-flex flex-column align-items-start">
         <Button
-          disabled={!Object.keys(unreadCount).length}
+          disabled={!Object.keys(unreadCountByFeed).length}
           className="my-2"
           onClick={markAllRead}
           style={{height: buttonHeight}}>
@@ -148,7 +128,7 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
           <p>All feeds</p>
         </Link>
         {feeds?.map(feed => {
-          const unread = unreadCount[feed._id];
+          const unread = unreadCountByFeed[feed._id];
           return (
             <Link
               key={feed._id}

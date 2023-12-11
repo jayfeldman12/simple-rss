@@ -26,21 +26,28 @@ const FeedsPage = () => {
     hasFetched,
     isFetching,
     items,
+    feeds,
     onItemClick,
     screenTitle,
     setFetchAll,
     showFetchAll,
-    unreadCount,
+    totalUnreadCount,
+    unreadCountByFeed,
+    refetchFeeds,
   } = useFeeds(logOut, feedId);
 
   return (
     <div>
-      <PageHead unreadCount={unreadCount} />
+      <PageHead unreadCount={totalUnreadCount} />
       <Background>
         <div className="row g-0">
           <Sidebar
             showFetchAll={showFetchAll}
             onPressFetchAll={() => setFetchAll(true)}
+            feedId={feedId}
+            refetchFeeds={refetchFeeds}
+            unreadCountByFeed={unreadCountByFeed}
+            feeds={feeds}
           />
           {/* Main body */}
           <div className="col px-5 py-4">
