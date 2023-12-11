@@ -46,7 +46,7 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
     }
     if (feedsResults?.length) {
       return {
-        feeds: feedsResults.flatMap(result => result.data ?? []),
+        feeds: feedsResults.flatMap(result => result.data?.feeds ?? []),
         isFetching: feedsResults.some(result => result.isLoading),
         error: feedsResults.find(result => result.error)?.error,
         isSuccess: feedsResults.every(result => result.isSuccess),

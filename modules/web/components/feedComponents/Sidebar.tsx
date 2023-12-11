@@ -55,7 +55,7 @@ export const Sidebar = ({showFetchAll, onPressFetchAll}: SidebarProps) => {
   );
 
   const feeds = useMemo(() => {
-    return feedsResults.flatMap(feed => feed.data ?? []) ?? [];
+    return feedsResults.flatMap(result => result.data?.feeds ?? []) ?? [];
   }, [feedsResults]);
 
   const {mutate: markRead} = useMarkRead();

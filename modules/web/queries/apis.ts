@@ -76,19 +76,8 @@ export const useGetFeeds = (
 ) => {
   const {fetchAll, feedIds} = feedOptions;
   return useQueries({
-    queries: feedIds.map(feedId => [
-      {
-        queryKey: [getFeedKey(token, feedOptions)],
-        queryFn: () =>
-          graphqlRequest<Feed>(FeedQuery, {onlyUnread: !fetchAll, feedId}),
-        options: {
-          refetchInterval: APP_FEED_REFRESH_TIME + 10, // make sure it's not marked as stale
-          refetchIntervalInBackground: true,
-          ...options,
-        },
-      },
-    ]),
-  }) as UseQueryResult<Feed[], Error>[];
+    queries: feedIds.map(feedId => getFeed(token, {fetchAll, feedId}, options)),
+  }) as UseQueryResult<FeedResponse, Error>[];
 };
 
 export const useGetFeed = (
@@ -96,16 +85,29 @@ export const useGetFeed = (
   feedOptions: GetFeedOptions = {},
   options?: QueryOptions<FeedResponse>,
 ) => {
-  const {fetchAll, feedId} = feedOptions;
-  return useQuery<FeedResponse, Error>(
-    getFeedKey(token, feedOptions),
-    () => graphqlRequest(FeedQuery, {onlyUnread: !fetchAll, feedId}),
-    {
+  const {
+    queryKey,
+    queryFn,
+    options: queryOptions,
+  } = getFeed(token, feedOptions, options);
+  return useQuery<FeedResponse, Error>(queryKey, queryFn, queryOptions);
+};
+
+const getFeed = (
+  token?: string,
+  feedOptions: GetFeedOptions = {},
+  options?: QueryOptions<FeedResponse>,
+) => {
+  const {feedId} = feedOptions;
+  return {
+    queryKey: getFeedKey(token, feedOptions),
+    queryFn: () => graphqlRequest<FeedResponse>(FeedQuery, {feedId}),
+    options: {
       refetchInterval: APP_FEED_REFRESH_TIME + 10, // make sure it's not marked as stale
       refetchIntervalInBackground: true,
       ...options,
     },
-  );
+  };
 };
 
 export const useListFeeds = (
