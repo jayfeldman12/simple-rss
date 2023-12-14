@@ -17,25 +17,19 @@ interface FeedsPageParams extends Params {
 
 const FeedsPage = () => {
   const router = useRouter();
-  const logOut = useCallback(() => router.push('/login'), [router]);
   const params = useParams<FeedsPageParams>();
   const feedId = params?.feedId?.[0];
+  const logOut = useCallback(() => router.push('/login'), [router]);
 
   const {
     errorMessage,
     hasFetched,
     isFetching,
     items,
-    feeds,
     onItemClick,
     screenTitle,
-    setFetchAll,
-    showFetchAll,
     totalUnreadCount,
-    unreadCountByFeed,
     markAllRead,
-    feedList,
-    refetchFeeds,
   } = useFeeds(logOut, feedId);
 
   return (
@@ -43,15 +37,7 @@ const FeedsPage = () => {
       <PageHead unreadCount={totalUnreadCount} />
       <Background>
         <div className="row g-0">
-          <Sidebar
-            showFetchAll={showFetchAll}
-            onPressFetchAll={() => setFetchAll(true)}
-            feedId={feedId}
-            markAllRead={markAllRead}
-            unreadCountByFeed={unreadCountByFeed}
-            feeds={feedList}
-            refetchFeeds={refetchFeeds}
-          />
+          <Sidebar markAllRead={markAllRead} />
           {/* Main body */}
           <div className="col px-5 py-4">
             <h1 className="pb-5">{screenTitle}</h1>

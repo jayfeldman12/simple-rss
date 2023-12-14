@@ -26,7 +26,7 @@ import {APP_FEED_REFRESH_TIME} from '../utils/consts';
 import {FeedQuery, ListFeeds, MarkRead} from './feedQueries';
 import {AddFeed, DeleteFeed, DeleteUser, Login} from './userQueries';
 
-type FeedResponse = {
+export type FeedResponse = {
   feeds: Feed[];
 };
 

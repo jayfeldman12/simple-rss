@@ -1,14 +1,13 @@
 'use client';
 
 import {useQueryClient} from '@tanstack/react-query';
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect} from 'react';
+import {useFeedContext} from '../../../context/feedProvider';
 import {Errors} from '../../../errors';
-import {useFetchFeeds} from '../../../hooks/useFetchFeeds';
 import {getFeedKey, useMarkRead} from '../../../queries/apis';
 import {FeedItem, MutationMarkReadArgs} from '../../api/graphql/models/types';
 
 export const useFeeds = (onLogout: () => void, feedId?: string) => {
-  const [fetchAll, setFetchAll] = useState(!!feedId);
   const queryClient = useQueryClient();
 
   const {
@@ -18,17 +17,21 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
     items,
     feeds,
     totalUnreadCount,
-    unreadCountByFeed,
-    refetchFeeds,
-    feedList,
-  } = useFetchFeeds(feedId, fetchAll);
-
-  const {mutate: markRead} = useMarkRead();
+    setFeedId,
+    setFetchAll,
+  } = useFeedContext();
 
   useEffect(() => {
-    if (feedId) setFetchAll(true);
-    else setFetchAll(false);
-  }, [feedId]);
+    if (feedId) {
+      setFeedId(feedId);
+      setFetchAll(true);
+    } else {
+      setFeedId(undefined);
+      setFetchAll(false);
+    }
+  }, [feedId, setFeedId, setFetchAll]);
+
+  const {mutate: markRead} = useMarkRead();
 
   useEffect(() => {
     if (errorMessage?.includes(Errors.UNAUTHORIZED)) {
@@ -90,15 +93,9 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
     hasFetched,
     isFetching,
     items,
-    feeds,
     onItemClick,
     screenTitle: feedId ? feeds?.[0]?.title ?? 'Your feeds' : 'Your feeds',
-    setFetchAll,
-    showFetchAll: !fetchAll && !!feeds,
     totalUnreadCount,
-    unreadCountByFeed,
     markAllRead,
-    refetchFeeds,
-    feedList,
   };
 };

@@ -33,10 +33,10 @@ export const TokenProvider = ({children}: {children: React.ReactNode}) => {
     setHasFetched(true);
   }, []);
 
-  const clearToken = useCallback(
-    () => localStorage.removeItem(TOKEN_LOCAL_STORAGE),
-    [],
-  );
+  const clearToken = useCallback(() => {
+    localStorage.removeItem(TOKEN_LOCAL_STORAGE);
+    setToken('');
+  }, []);
 
   const setNewToken = useCallback((newToken: string) => {
     setToken(newToken);

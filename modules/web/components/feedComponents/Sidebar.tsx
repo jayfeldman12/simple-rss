@@ -1,89 +1,40 @@
 'use client';
 
-import {useCallback, useMemo, useState} from 'react';
+import {useState} from 'react';
 
-import {useQueryClient} from '@tanstack/react-query';
 import Link from 'next/link';
-import {useRouter} from 'next/navigation';
 import Button from 'react-bootstrap/Button';
 import SubmitButton from '../../components/common/SubmitButton';
 import {AddFeed} from '../../components/feedComponents/AddFeed';
-import {useTokenContext} from '../../context/tokenProvider';
 import {useWindowDimensions} from '../../hooks/useWindowDimensions';
-import {
-  FeedListResponse,
-  getFeedKey,
-  useAddFeed,
-  useDeleteFeed,
-  useDeleteUser,
-} from '../../queries/apis';
+import {useSidebar} from './useSidebar';
 
 interface SidebarProps {
-  showFetchAll: boolean;
-  onPressFetchAll: () => void;
-  feedId?: string;
-  feeds?: FeedListResponse['feeds'];
-  unreadCountByFeed: Record<string, number>;
-  refetchFeeds: () => void;
   markAllRead: () => void;
 }
 
 const buttonHeight = '2.5rem';
 
-export const Sidebar = ({
-  showFetchAll,
-  onPressFetchAll,
-  feedId,
-  feeds,
-  unreadCountByFeed,
-  refetchFeeds,
-  markAllRead,
-}: SidebarProps) => {
+export const Sidebar = ({markAllRead}: SidebarProps) => {
   const [showReallyDelete, setShowReallyDelete] = useState(false);
-  const queryClient = useQueryClient();
   const {windowHeight} = useWindowDimensions();
 
-  const router = useRouter();
-
-  const logOut = useCallback(() => router.replace('login'), [router]);
-  const {clearToken} = useTokenContext();
-
-  const onLogOut = useCallback(() => {
-    clearToken();
-    logOut();
-  }, [clearToken, logOut]);
-
   const {
-    mutate: addFeedByUrl,
-    isLoading: addingFeed,
-    error: addFeedError,
-  } = useAddFeed({
-    onSuccess: () => {
-      refetchFeeds();
-    },
-  });
-  const {mutate: deleteFeedById, isLoading: deletingFeed} = useDeleteFeed({
-    onSuccess: () => {
-      router.replace('/feeds');
-      refetchFeeds();
-    },
-  });
-  const {mutate: deleteUser, isLoading: deletingUser} = useDeleteUser();
-
-  const addFeed = (url: string) => {
-    addFeedByUrl(
-      {url},
-      {
-        onSuccess: () =>
-          queryClient.invalidateQueries({queryKey: getFeedKey()}),
-      },
-    );
-  };
-
-  const activeFeed = useMemo(
-    () => feeds?.find(feed => feed._id.toString() === feedId),
-    [feedId, feeds],
-  );
+    fetchAll,
+    setFetchAll,
+    unreadCountByFeed,
+    onLogOut,
+    addingFeed,
+    addFeedError,
+    deleteFeedById,
+    deletingFeed,
+    deleteUser,
+    deletingUser,
+    addFeed,
+    activeFeed,
+    feedId,
+    feedList,
+  } = useSidebar();
 
   return (
     <div
@@ -100,8 +51,8 @@ export const Sidebar = ({
 
         <Button
           className="my-2"
-          disabled={!showFetchAll}
-          onClick={onPressFetchAll}
+          disabled={!fetchAll}
+          onClick={() => setFetchAll(true)}
           style={{height: buttonHeight}}>
           Get all items
         </Button>
@@ -114,7 +65,7 @@ export const Sidebar = ({
         <Link href={'/feeds'} className="no-text-change">
           <p>All feeds</p>
         </Link>
-        {feeds?.map(feed => {
+        {feedList?.map(feed => {
           const unread = unreadCountByFeed[feed._id];
           return (
             <Link
