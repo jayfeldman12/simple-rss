@@ -24,6 +24,7 @@ export const useSidebar = () => {
     unreadCountByFeed,
     refetchFeeds,
     feedList,
+    rawResults,
   } = useFeedContext();
 
   const router = useRouter();
@@ -31,10 +32,12 @@ export const useSidebar = () => {
   const logOut = useCallback(() => router.replace('login'), [router]);
   const {clearToken} = useTokenContext();
 
-  const onLogOut = useCallback(() => {
-    clearToken();
+  const onLogOut = useCallback(async () => {
+    await clearToken();
     logOut();
-  }, [clearToken, logOut]);
+    await queryClient.resetQueries();
+    queryClient.invalidateQueries();
+  }, [clearToken, logOut, queryClient]);
 
   const {
     mutate: addFeedByUrl,
@@ -83,5 +86,6 @@ export const useSidebar = () => {
     activeFeed,
     feedList,
     feedId,
+    rawResults,
   };
 };

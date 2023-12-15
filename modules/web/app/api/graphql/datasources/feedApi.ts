@@ -17,7 +17,7 @@ export class FeedApi extends RESTDataSource {
   }
 
   public getItemsFromFeed = async (
-    {rssUrl, reads, _id: feedId, url}: Feed,
+    {rssUrl, reads, _id: feedId}: Feed,
     onlyUnread?: boolean,
   ): Promise<FeedItem[]> => {
     return this.feedCache.getCacheOrFetch(feedId, async () => {
@@ -62,7 +62,10 @@ export class FeedApi extends RESTDataSource {
     });
   };
 
-  public getFeedInfoFromUrl = async (url: string): Promise<Partial<Feed>> => {
+  public getFeedInfoFromUrl = async (
+    url: string,
+    reads: string[] | null = [],
+  ): Promise<Partial<Feed>> => {
     const fixedUrl = url.includes('http') ? url : 'https://' + url;
     const origin = new URL(fixedUrl).origin;
     const siteText = await this.withTimeout(
@@ -88,9 +91,12 @@ export class FeedApi extends RESTDataSource {
       return {
         url: origin,
         rssUrl: rssFixedUrl,
-        icon: icon ? new URL(icon, fixedUrl).href : undefined,
-        reads: [],
+        icon: icon
+          ? new URL(icon, fixedUrl).href.replace('http://', 'https://')
+          : undefined,
+        reads,
         title,
+        dateUpdated: new Date().toISOString(),
       };
     }
     // If no RSS feed found, reject promise because there will be no data

@@ -109,6 +109,7 @@ export type Feed = {
   title?: Maybe<Scalars['String']>;
   /** URL of the main site */
   url: Scalars['String'];
+  dateUpdated: Maybe<Scalars['String']>;
 };
 
 /** A URL users subscribe to for RSS feeds */

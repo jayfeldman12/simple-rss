@@ -15,15 +15,51 @@ import {
 import {User, WithUserId} from '../models/users';
 import {FeedApi} from './feedApi';
 
+const FEED_REFRESH_TIME_MS = 1000 * 60 * 60 * 24 * 7;
+
 export default class UsersApi extends MongoDataSource<User> {
   protected INVALID_CREDENTIALS = 'Invalid credentials';
 
   // @ts-expect-error not uninitialized, it's assigned in the super. Declaring here to override type
   protected collection: Collection<Document>;
 
-  public async getUser(userId: ObjectId) {
-    return this.findOneById(userId, {ttl: USER_REFRESH_TIME});
+  public async getUser(
+    userId: ObjectId,
+    feedApi: FeedApi,
+  ): Promise<Maybe<User>> {
+    const user = await this.findOneById(userId, {ttl: USER_REFRESH_TIME});
+    if (!user) return null;
+
+    const refreshedFeeds = await this.refreshFeedInfo(user, feedApi);
+    return {...user, feeds: refreshedFeeds};
   }
+
+  public refreshFeedInfo = async (user: User, feedApi: FeedApi) => {
+    const results = Promise.allSettled(
+      user.feeds.map(async feed => {
+        const dateUpdated = feed.dateUpdated;
+        const newFeed = {...feed};
+        if (
+          !dateUpdated ||
+          new Date(dateUpdated).getTime() < Date.now() - FEED_REFRESH_TIME_MS
+        ) {
+          Object.assign(
+            newFeed,
+            await feedApi.getFeedInfoFromUrl(feed.url, feed.reads),
+          );
+          this.collection.updateOne(
+            {_id: user._id, 'feeds._id': feed._id},
+            {$set: {'feeds.$': newFeed}},
+          );
+          await this.deleteFromCacheById(user._id);
+        }
+        return newFeed;
+      }),
+    );
+    return (await results).map((result, index) =>
+      result.status === 'fulfilled' ? result.value : user.feeds[index],
+    );
+  };
 
   public async createUser(
     username: string,
@@ -109,7 +145,7 @@ export default class UsersApi extends MongoDataSource<User> {
     userId: ObjectId,
     rssUrl?: Maybe<string>,
   ) => {
-    const userPromise = this.getUser(userId);
+    const userPromise = this.getUser(userId, feedApi);
     const feed: Partial<Feed> = {
       url,
       _id: new ObjectId().toString(),

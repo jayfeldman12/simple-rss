@@ -88,6 +88,12 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
     });
   }, [feeds, markRead, queryClient]);
 
+  useEffect(() => {
+    document.title = `${
+      totalUnreadCount ? `(${totalUnreadCount}) ` : ''
+    }Simple Rss`;
+  }, [totalUnreadCount]);
+
   return {
     errorMessage,
     hasFetched,
@@ -95,7 +101,6 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
     items,
     onItemClick,
     screenTitle: feedId ? feeds?.[0]?.title ?? 'Your feeds' : 'Your feeds',
-    totalUnreadCount,
     markAllRead,
   };
 };

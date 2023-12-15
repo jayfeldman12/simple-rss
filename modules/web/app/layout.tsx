@@ -16,7 +16,7 @@ const queryClient = new QueryClient({
 });
 
 export const metadata: Metadata = {
-  title: 'Home',
+  title: 'Simple Rss',
   description: 'RSS feed',
   applicationName: 'Simple RSS',
 };

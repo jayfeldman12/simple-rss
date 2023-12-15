@@ -7,6 +7,7 @@ import Button from 'react-bootstrap/Button';
 import SubmitButton from '../../components/common/SubmitButton';
 import {AddFeed} from '../../components/feedComponents/AddFeed';
 import {useWindowDimensions} from '../../hooks/useWindowDimensions';
+import {SidebarIcon} from './SidebarIcon';
 import {useSidebar} from './useSidebar';
 
 interface SidebarProps {
@@ -34,6 +35,7 @@ export const Sidebar = ({markAllRead}: SidebarProps) => {
     activeFeed,
     feedId,
     feedList,
+    rawResults,
   } = useSidebar();
 
   return (
@@ -65,43 +67,19 @@ export const Sidebar = ({markAllRead}: SidebarProps) => {
         <Link href={'/feeds'} className="no-text-change">
           <p>All feeds</p>
         </Link>
-        {feedList?.map(feed => {
-          const unread = unreadCountByFeed[feed._id];
+        {feedList?.map((feed, index) => {
+          const unreadCount = unreadCountByFeed[feed._id];
           return (
             <Link
               key={feed._id}
               href={`/feeds/${feed._id}`}
               className="no-text-change">
-              <div
-                className="d-flex flex-row my-1 align-self-stretch align-items-center justify-content-between"
-                style={{cursor: 'pointer'}}>
-                <div className="d-flex flex-row align-items-center">
-                  {feed.icon ? (
-                    // Using image from arbitrary remote sources, so don't want API optimization
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={feed.icon}
-                      alt={`Icon for ${feed.title}`}
-                      width="25"
-                      height="25"
-                      className="me-2"
-                    />
-                  ) : (
-                    <div style={{height: 25, width: 25}} className="me-2" />
-                  )}
-                  <p
-                    className="text-start mb-0"
-                    style={{
-                      fontWeight:
-                        activeFeed?._id === feed._id ? 'bold' : 'normal',
-                    }}>
-                    {feed.title}
-                  </p>
-                </div>
-                {unread ? (
-                  <p className="mb-0 text-info ms-2">{unread}</p>
-                ) : null}
-              </div>
+              <SidebarIcon
+                {...feed}
+                isActive={feed._id === activeFeed?._id}
+                unreadCount={unreadCount}
+                isLoading={rawResults[index]?.isLoading ?? false}
+              />
             </Link>
           );
         })}

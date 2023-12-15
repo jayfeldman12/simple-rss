@@ -5,7 +5,6 @@ import {useCallback, useState} from 'react';
 import Form from 'react-bootstrap/Form';
 import SubmitButton from '../../components/common/SubmitButton';
 import {Background} from '../../components/common/background';
-import {PageHead} from '../../components/common/pageHead';
 import {useTokenContext} from '../../context/tokenProvider';
 import {useCreateAccount} from '../../queries/apis';
 
@@ -51,7 +50,6 @@ const CreateAccountPage = ({}) => {
 
   return (
     <div>
-      <PageHead />
       <Background>
         <div className="px-4 py-3">
           <h1>Simple Rss</h1>

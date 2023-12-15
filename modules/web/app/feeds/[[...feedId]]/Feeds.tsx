@@ -6,7 +6,6 @@ import {useCallback} from 'react';
 import Row from 'react-bootstrap/Row';
 import {Spinner} from '../../../components/common/Spinner';
 import {Background} from '../../../components/common/background';
-import {PageHead} from '../../../components/common/pageHead';
 import {Sidebar} from '../../../components/feedComponents/Sidebar';
 import FeedCard from '../../../components/feedComponents/feedCard';
 import {useFeeds} from './useFeeds';
@@ -28,13 +27,11 @@ const FeedsPage = () => {
     items,
     onItemClick,
     screenTitle,
-    totalUnreadCount,
     markAllRead,
   } = useFeeds(logOut, feedId);
 
   return (
     <div>
-      <PageHead unreadCount={totalUnreadCount} />
       <Background>
         <div className="row g-0">
           <Sidebar markAllRead={markAllRead} />

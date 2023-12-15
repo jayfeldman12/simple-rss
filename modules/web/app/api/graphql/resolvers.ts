@@ -41,7 +41,7 @@ export const resolvers: ApolloServerOptionsWithTypeDefs<RequestContext>['resolve
         }
         Logger.log('Hitting get feeds');
         const response =
-          (await usersApi.getUser(userId))?.feeds.filter(feed =>
+          (await usersApi.getUser(userId, feedApi))?.feeds.filter(feed =>
             args.feedId ? args.feedId === feed._id.toString() : true,
           ) ?? [];
         Logger.log('Finished getting feeds');
