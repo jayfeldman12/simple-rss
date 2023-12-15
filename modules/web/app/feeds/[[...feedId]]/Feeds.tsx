@@ -3,7 +3,7 @@
 import {Params} from 'next/dist/shared/lib/router/utils/route-matcher';
 import {useParams, useRouter} from 'next/navigation';
 import {useCallback} from 'react';
-import Row from 'react-bootstrap/Row';
+import {Row} from 'react-bootstrap';
 import {Spinner} from '../../../components/common/Spinner';
 import {Background} from '../../../components/common/background';
 import {Sidebar} from '../../../components/feedComponents/Sidebar';

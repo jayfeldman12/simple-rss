@@ -3,8 +3,8 @@
 import {useEffect, useState} from 'react';
 
 export const useWindowDimensions = () => {
-  const [windowHeight, setWindowHeight] = useState<number | string>('100rem');
-  const [windowWidth, setWindowWidth] = useState<number | string>('100rem');
+  const [windowHeight, setWindowHeight] = useState<number>(1200);
+  const [windowWidth, setWindowWidth] = useState<number>(900);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

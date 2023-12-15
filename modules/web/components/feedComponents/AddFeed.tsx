@@ -13,8 +13,8 @@ interface AddFeedProps {
 export const AddFeed = ({addFeedLoading, error, onSubmit}: AddFeedProps) => {
   const [url, setUrl] = useState('');
   return (
-    <div>
-      <div className="py-3 d-flex flex-row">
+    <>
+      <div className="py-3 d-flex flex-row add-feed">
         <Form.Control
           onChange={e => setUrl(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && onSubmit(e.currentTarget.value)}
@@ -32,6 +32,6 @@ export const AddFeed = ({addFeedLoading, error, onSubmit}: AddFeedProps) => {
           subscription
         </h5>
       ) : null}
-    </div>
+    </>
   );
 };

@@ -1,0 +1,11 @@
+.sidebar-button {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: start;
+}
+
+.add-feed {
+  margin-left: -0.5rem;
+  margin-right: -0.8rem;
+}
