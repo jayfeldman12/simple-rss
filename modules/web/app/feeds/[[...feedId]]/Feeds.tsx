@@ -2,7 +2,7 @@
 
 import {Params} from 'next/dist/shared/lib/router/utils/route-matcher';
 import {useParams, useRouter} from 'next/navigation';
-import {useCallback} from 'react';
+import {useCallback, useState} from 'react';
 import {Row} from 'react-bootstrap';
 import {Spinner} from '../../../components/common/Spinner';
 import {Background} from '../../../components/common/background';
@@ -19,6 +19,7 @@ const FeedsPage = () => {
   const params = useParams<FeedsPageParams>();
   const feedId = params?.feedId?.[0];
   const logOut = useCallback(() => router.push('/login'), [router]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const {
     errorMessage,
@@ -31,29 +32,31 @@ const FeedsPage = () => {
   } = useFeeds(logOut, feedId);
 
   return (
-    <div>
-      <Background>
-        <div className="row g-0">
-          <Sidebar markAllRead={markAllRead} />
-          {/* Main body */}
-          <div className="col px-5 py-4">
-            <h1 className="pb-5">{screenTitle}</h1>
-            {errorMessage ? (
-              <h5 className="text-danger">{errorMessage}</h5>
-            ) : null}
-            {isFetching ? <Spinner /> : null}
-            {hasFetched && !items?.length ? (
-              <h5 className="py-5">All read!</h5>
-            ) : null}
-            <Row xs={1} md={2} lg={3} xl={4} className="g-4 text-dark">
-              {items?.map(item => (
-                <FeedCard key={item.id} item={item} onItemClick={onItemClick} />
-              ))}
-            </Row>
-          </div>
+    <Background>
+      <Row className="g-0">
+        <Sidebar
+          markAllRead={markAllRead}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+        {/* Main body */}
+        <div className={`${sidebarOpen ? 'col-6' : 'col'} px-5 py-4`}>
+          <h1 className="pb-5">{screenTitle}</h1>
+          {errorMessage ? (
+            <h5 className="text-danger">{errorMessage}</h5>
+          ) : null}
+          {isFetching ? <Spinner /> : null}
+          {hasFetched && !items?.length ? (
+            <h5 className="py-5">All read!</h5>
+          ) : null}
+          <Row xs={1} md={2} lg={3} xl={4} className="g-4 text-dark">
+            {items?.map(item => (
+              <FeedCard key={item.id} item={item} onItemClick={onItemClick} />
+            ))}
+          </Row>
         </div>
-      </Background>
-    </div>
+      </Row>
+    </Background>
   );
 };
 

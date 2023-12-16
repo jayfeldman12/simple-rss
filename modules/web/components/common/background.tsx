@@ -13,9 +13,7 @@ export const Background = ({children}: BackgroundProps) => {
     <main>
       <div
         className={`container-fluid text-center bg-dark text-white height-full g-0`}
-        style={{
-          minHeight: windowHeight,
-        }}>
+        style={{minHeight: windowHeight}}>
         {children}
       </div>
     </main>

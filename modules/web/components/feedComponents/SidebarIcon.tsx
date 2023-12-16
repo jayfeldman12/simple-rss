@@ -9,7 +9,7 @@ const Icon = ({icon, title}: {icon: string; title: string}) => {
         alt={`Icon for ${title}`}
         width="25"
         height="25"
-        className="me-2"
+        className="me-2 my-1"
       />
     );
   }
