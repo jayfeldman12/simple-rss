@@ -15,7 +15,7 @@ interface FeedProvider {
   errorMessage: string;
   hasFetched: boolean;
   refetchFeeds: () => void;
-  isFetching: boolean;
+  isPending: boolean;
   feeds: Feed[];
   items: FeedItem[] | undefined;
   unreadCountByFeed: Record<string, number>;
@@ -32,7 +32,7 @@ export const FeedContext = React.createContext<FeedProvider>({
   errorMessage: '',
   hasFetched: false,
   refetchFeeds: () => {},
-  isFetching: false,
+  isPending: false,
   feeds: [],
   items: [],
   unreadCountByFeed: {},
@@ -72,7 +72,7 @@ export const FeedProvider = ({
   const {
     data: {feeds: feed} = {},
     isSuccess: isFeedSuccess,
-    isFetching: isFeedFetching,
+    isPending: isFeedFetching,
     error: feedError,
   } = useGetFeed({fetchAll, feedId}, {enabled: !!feedId});
   const feedsResults = useGetFeeds(
@@ -85,11 +85,11 @@ export const FeedProvider = ({
     [feedsResults],
   );
 
-  const {feeds, isFetching, error, isSuccess} = useMemo(() => {
+  const {feeds, isPending, error, isSuccess} = useMemo(() => {
     if (feedId && feed?.length) {
       return {
         feeds: feed,
-        isFetching: isFeedFetching,
+        isPending: isFeedFetching,
         error: feedError,
         isSuccess: isFeedSuccess,
       };
@@ -97,15 +97,16 @@ export const FeedProvider = ({
     if (flatFeeds.length) {
       return {
         feeds: flatFeeds,
-        isFetching:
-          listLoading || feedsResults.some(result => result.isLoading),
+        isPending:
+          listLoading ||
+          feedsResults.some(result => result.isPending || result.isRefetching),
         error: feedsResults.find(result => result.error)?.error,
         isSuccess: feedsResults.every(result => result.isSuccess),
       };
     }
     return {
       feeds: [],
-      isFetching: listLoading,
+      isPending: listLoading,
       error: undefined,
       isSuccess: false,
     };
@@ -121,11 +122,11 @@ export const FeedProvider = ({
   ]);
 
   const errorMessage = useMemo(() => {
-    if (!error || isFetching) {
+    if (!error || isPending) {
       return '';
     }
     return error.message;
-  }, [error, isFetching]);
+  }, [error, isPending]);
 
   const items = useMemo(() => {
     if (feeds) {
@@ -164,7 +165,7 @@ export const FeedProvider = ({
         errorMessage,
         hasFetched: isSuccess,
         refetchFeeds: refetch,
-        isFetching,
+        isPending,
         feeds,
         items,
         unreadCountByFeed,

@@ -25,7 +25,7 @@ const CreateAccountPage = ({}) => {
 
   const {
     mutate: createAccount,
-    isLoading,
+    isPending,
     error,
   } = useCreateAccount({
     onSuccess: ({token}) => {
@@ -78,7 +78,7 @@ const CreateAccountPage = ({}) => {
           ) : null}
           <SubmitButton
             className="col-sm-6 my-4"
-            isLoading={isLoading}
+            isLoading={isPending}
             disabled={!username || !password || !confirmPassword}
             onClick={onCreateAccount}>
             Create Account

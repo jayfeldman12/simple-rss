@@ -23,7 +23,7 @@ const LoginPage = () => {
 
   const {
     mutate: login,
-    isLoading,
+    isPending,
     error,
   } = useLogin({
     onSuccess: res => {
@@ -61,7 +61,7 @@ const LoginPage = () => {
             onKeyDown={e => e.key === 'Enter' && onLogin()}></Form.Control>
           <SubmitButton
             className="col-sm-6 my-4"
-            isLoading={isLoading}
+            isLoading={isPending}
             disabled={!username || !password}
             onClick={onLogin}>
             Log In

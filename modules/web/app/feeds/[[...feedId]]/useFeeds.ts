@@ -13,7 +13,7 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
   const {
     errorMessage,
     hasFetched,
-    isFetching,
+    isPending,
     items,
     feeds,
     totalUnreadCount,
@@ -97,7 +97,7 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
   return {
     errorMessage,
     hasFetched,
-    isFetching,
+    isPending,
     items,
     onItemClick,
     screenTitle: feedId ? feeds?.[0]?.title ?? 'Your feeds' : 'Your feeds',

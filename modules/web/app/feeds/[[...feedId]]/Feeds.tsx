@@ -24,7 +24,7 @@ const FeedsPage = () => {
   const {
     errorMessage,
     hasFetched,
-    isFetching,
+    isPending,
     items,
     onItemClick,
     screenTitle,
@@ -45,7 +45,7 @@ const FeedsPage = () => {
           {errorMessage ? (
             <h5 className="text-danger">{errorMessage}</h5>
           ) : null}
-          {isFetching ? <Spinner /> : null}
+          {isPending ? <Spinner /> : null}
           {hasFetched && !items?.length ? (
             <h5 className="py-5">All read!</h5>
           ) : null}

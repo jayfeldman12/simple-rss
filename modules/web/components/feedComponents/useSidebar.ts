@@ -41,20 +41,20 @@ export const useSidebar = () => {
 
   const {
     mutate: addFeedByUrl,
-    isLoading: addingFeed,
+    isPending: addingFeed,
     error: addFeedError,
   } = useAddFeed({
     onSuccess: () => {
       refetchFeeds();
     },
   });
-  const {mutate: deleteFeedById, isLoading: deletingFeed} = useDeleteFeed({
+  const {mutate: deleteFeedById, isPending: deletingFeed} = useDeleteFeed({
     onSuccess: () => {
       router.replace('/feeds');
       refetchFeeds();
     },
   });
-  const {mutate: deleteUser, isLoading: deletingUser} = useDeleteUser();
+  const {mutate: deleteUser, isPending: deletingUser} = useDeleteUser();
 
   const addFeed = (url: string) => {
     addFeedByUrl(

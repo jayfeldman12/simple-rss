@@ -77,95 +77,93 @@ export const useGetFeed = (
   feedOptions: GetFeedOptions = {},
   options?: QueryOptions<FeedResponse>,
 ) => {
-  const {
-    queryKey,
-    queryFn,
-    options: queryOptions,
-  } = getFeed(feedOptions, options);
-  return useQuery<FeedResponse, Error>(queryKey, queryFn, queryOptions);
+  const {queryKey, queryFn, ...queryOptions} = getFeed(feedOptions, options);
+  return useQuery<FeedResponse, Error>({queryKey, queryFn, ...queryOptions});
 };
 
 const getFeed = (
   feedOptions: GetFeedOptions = {},
   options?: QueryOptions<FeedResponse>,
-) => {
+): UseQueryOptions<FeedResponse, Error> => {
   const {feedId, fetchAll} = feedOptions;
   return {
     queryKey: getFeedKey(feedOptions),
     queryFn: () =>
-      graphqlRequest<FeedResponse>(FeedQuery, {feedId, onlyUnread: !fetchAll}),
-    options: {
-      refetchInterval: APP_FEED_REFRESH_TIME + 10, // make sure it's not marked as stale
-      refetchIntervalInBackground: true,
-      ...options,
-    },
+      graphqlRequest<FeedResponse>(FeedQuery, {
+        feedId,
+        onlyUnread: !fetchAll,
+      }),
+    refetchInterval: APP_FEED_REFRESH_TIME + 10, // make sure it's not marked as stale
+    refetchIntervalInBackground: true,
+    staleTime: APP_FEED_REFRESH_TIME,
+    ...options,
   };
 };
 
 export const useListFeeds = (options?: QueryOptions<FeedListResponse>) => {
-  return useQuery<FeedListResponse, Error>(
-    ['listFeeds'],
-    () => graphqlRequest(ListFeeds, {}),
-    options,
-  );
+  return useQuery<FeedListResponse, Error>({
+    queryKey: ['listFeeds'],
+    queryFn: () => graphqlRequest(ListFeeds, {}),
+    ...options,
+  });
 };
 
 export const useMarkRead = (
   options?: MutationOptions<MarkReadResponse, MutationMarkReadArgs>,
 ) => {
-  return useMutation(
-    ['markRead'],
-    (variables: MutationMarkReadArgs) =>
+  return useMutation({
+    mutationKey: ['markRead'],
+    mutationFn: (variables: MutationMarkReadArgs) =>
       graphqlRequest<MarkReadResponse>(MarkRead, {...variables}),
-    options,
-  );
+    ...options,
+  });
 };
 
 export const useAddFeed = (
   options?: MutationOptions<AddFeedResponse, MutationAddFeedArgs>,
 ) => {
-  return useMutation<AddFeedResponse, Error, MutationAddFeedArgs>(
-    async (variables: MutationAddFeedArgs) =>
+  return useMutation<AddFeedResponse, Error, MutationAddFeedArgs>({
+    mutationFn: async (variables: MutationAddFeedArgs) =>
       graphqlRequest(AddFeed, {...variables}),
-    options,
-  );
+    ...options,
+  });
 };
 
 export const useDeleteFeed = (
   options?: MutationOptions<DeleteFeedResponse, MutationDeleteFeedArgs>,
 ) => {
-  return useMutation(
-    (variables: MutationDeleteFeedArgs) =>
+  return useMutation({
+    mutationFn: (variables: MutationDeleteFeedArgs) =>
       graphqlRequest<DeleteFeedResponse>(DeleteFeed, {...variables}),
-    options,
-  );
+    ...options,
+  });
 };
 
 export const useDeleteUser = (
   options?: MutationOptions<DeleteUserResponse, void>,
 ) => {
-  return useMutation(
-    () => graphqlRequest<DeleteUserResponse>(DeleteUser, {}),
-    options,
-  );
+  return useMutation({
+    mutationFn: () => graphqlRequest<DeleteUserResponse>(DeleteUser, {}),
+    ...options,
+  });
 };
 
 export const useLogin = (
   options?: MutationOptions<LoginResponse, MutationLoginArgs>,
 ) => {
-  return useMutation<LoginResponse, Error, MutationLoginArgs>(
-    async (variables: MutationLoginArgs) =>
+  return useMutation<LoginResponse, Error, MutationLoginArgs>({
+    mutationFn: async (variables: MutationLoginArgs) =>
       graphqlRequest(Login, {...variables}),
-    options,
-  );
+    ...options,
+  });
 };
 
 export const useCreateAccount = (
   options?: MutationOptions<CreateUserResponse, MutationCreateUserArgs>,
 ) => {
-  return useMutation<CreateUserResponse, Error, MutationCreateUserArgs>(
-    async (variables: MutationCreateUserArgs) =>
+  return useMutation<CreateUserResponse, Error, MutationCreateUserArgs>({
+    mutationFn: async (variables: MutationCreateUserArgs) =>
       graphqlRequest(Login, {...variables}),
-    options,
-  );
+    ...options,
+  });
 };
