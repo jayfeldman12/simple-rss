@@ -104,6 +104,7 @@ export const useListFeeds = (options?: QueryOptions<FeedListResponse>) => {
   return useQuery<FeedListResponse, Error>({
     queryKey: ['listFeeds'],
     queryFn: () => graphqlRequest(ListFeeds, {}),
+    retry: 3,
     ...options,
   });
 };
