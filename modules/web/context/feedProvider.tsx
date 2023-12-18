@@ -10,6 +10,7 @@ import {
   useGetFeeds,
   useListFeeds,
 } from '../queries/apis';
+import {useTokenContext} from './tokenProvider';
 
 interface FeedProvider {
   errorMessage: string;
@@ -58,6 +59,7 @@ export const FeedProvider = ({
 }: {
   children: React.ReactNode;
 }): JSX.Element => {
+  const {token} = useTokenContext();
   const [feedId, setFeedId] = useState<string | undefined>(undefined);
   const [fetchAll, setFetchAll] = useState(false);
 
@@ -65,7 +67,7 @@ export const FeedProvider = ({
     data: feedListResponse,
     isLoading: listLoading,
     refetch,
-  } = useListFeeds();
+  } = useListFeeds({enabled: !!token});
   const feedList = feedListResponse?.feeds;
   const feedIds = feedList?.map(f => f._id) ?? [];
 
