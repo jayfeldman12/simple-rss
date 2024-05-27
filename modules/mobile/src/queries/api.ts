@@ -16,6 +16,8 @@ import {
   useQueries,
   useQuery,
 } from '@tanstack/react-query';
+import {APP_FEED_REFRESH_TIME} from './consts';
+import {graphqlRequest} from './graphqlRequest';
 import {
   AddFeedResponse,
   CreateUserResponse,
@@ -29,9 +31,7 @@ import {
   MutationDeleteFeedArgs,
   MutationLoginArgs,
   MutationMarkReadArgs,
-} from '../app/api/graphql/models/types';
-import {graphqlRequest} from '../graphqlRequest';
-import {APP_FEED_REFRESH_TIME} from '../utils/consts';
+} from './types';
 
 export type FeedResponse = {
   feeds: Feed[];

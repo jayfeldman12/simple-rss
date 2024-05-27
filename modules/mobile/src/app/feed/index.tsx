@@ -1,9 +1,15 @@
-import {Text, View} from 'react-native';
+import styled from 'styled-components/native';
+import Title from '../../components/Title';
 
-export default function Feed() {
+const Container = styled.SafeAreaView`
+  flex: 1;
+  align-items: center;
+`;
+
+export default function Login() {
   return (
-    <View>
-      <Text>Feed</Text>
-    </View>
+    <Container>
+      <Title>Your feeds</Title>
+    </Container>
   );
 }

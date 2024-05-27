@@ -26,7 +26,8 @@
     "**/*.tsx",
     "app/api/graphql/route.ts",
     "app/api/graphql/schema.qs",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "../common/queries/types.ts"
   ],
   "exclude": ["node_modules"]
 }
