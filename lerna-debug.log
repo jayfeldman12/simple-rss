@@ -1,12 +1,12 @@
 0 silly argv {
-0 silly argv   _: [ 'bootstrap' ],
-0 silly argv   lernaVersion: '5.4.3',
-0 silly argv   '$0': 'node_modules/.bin/lerna'
+0 silly argv   _: [ 'repair' ],
+0 silly argv   lernaVersion: '6.6.2',
+0 silly argv   '$0': '/Users/jay/Projects/simple-rss/node_modules/.bin/lerna'
 0 silly argv }
-1 notice cli v5.4.3
-2 verbose rootPath /Users/jay/Projects/simpleRSS
+1 notice cli v6.6.2
+2 verbose rootPath /Users/jay/Projects/simple-rss
 3 error TypeError: packageConfigs.some is not a function
-3 error     at getGlobOpts (/Users/jay/Projects/simpleRSS/node_modules/@lerna/project/lib/make-file-finder.js:26:22)
-3 error     at makeFileFinder (/Users/jay/Projects/simpleRSS/node_modules/@lerna/project/lib/make-file-finder.js:45:20)
-3 error     at Project.get fileFinder [as fileFinder] (/Users/jay/Projects/simpleRSS/node_modules/@lerna/project/index.js:210:20)
-3 error     at Project.getPackages (/Users/jay/Projects/simpleRSS/node_modules/@lerna/project/index.js:229:17)
+3 error     at getGlobOpts (/Users/jay/Projects/simple-rss/node_modules/lerna/dist/cli.js:1290:22)
+3 error     at makeFileFinder (/Users/jay/Projects/simple-rss/node_modules/lerna/dist/cli.js:1306:20)
+3 error     at get fileFinder [as fileFinder] (/Users/jay/Projects/simple-rss/node_modules/lerna/dist/cli.js:1551:24)
+3 error     at _Project.getPackages (/Users/jay/Projects/simple-rss/node_modules/lerna/dist/cli.js:1564:21)

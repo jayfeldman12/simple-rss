@@ -1,11 +1,6 @@
 {
   "name": "root",
   "private": true,
-  "workspaces": {
-    "nohoist": [
-      "modules/*"
-    ]
-  },
   "scripts": {
     "tsc": "tsc --noEmit",
     "android": "cd modules/mobile && yarn android",
@@ -19,7 +14,7 @@
     "@types/jest": "^29.0.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "lerna": "^5.4.3",
+    "lerna": "^8.1.3",
     "typescript": "^4.4.4"
   }
 }
