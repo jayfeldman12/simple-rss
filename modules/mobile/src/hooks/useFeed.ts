@@ -3,9 +3,9 @@
 import {Errors} from '@simple-rss/common';
 import {useQueryClient} from '@tanstack/react-query';
 import {useCallback, useEffect} from 'react';
-import {useFeedContext} from '../../../context/feedProvider';
-import {getFeedKey, useMarkRead} from '../../../queries/apis';
-import {FeedItem, MutationMarkReadArgs} from '../../api/graphql/models/types';
+import {useFeedContext} from '../context/feedContext';
+import {getFeedKey, useMarkRead} from '../queries/api';
+import {FeedItem, MutationMarkReadArgs} from '../queries/types';
 
 export const useFeeds = (onLogout: () => void, feedId?: string) => {
   const queryClient = useQueryClient();

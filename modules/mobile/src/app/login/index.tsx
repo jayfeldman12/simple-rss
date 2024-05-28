@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {router} from 'expo-router';
 import {useState} from 'react';
 import styled from 'styled-components/native';
@@ -7,8 +6,7 @@ import Button from '../../components/Button';
 import Input from '../../components/Input';
 import Title from '../../components/Title';
 import {useLogin} from '../../queries/api';
-import {TOKEN_LOCAL_STORAGE} from '../../queries/consts';
-import {useAuthStore} from '../../store/authStore';
+import {useTokenStore} from '../../store/tokenStore';
 
 const Container = styled.SafeAreaView`
   flex: 1;
@@ -36,10 +34,9 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const {isPending, mutate: logIn} = useLogin();
-  const appLogIn = useAuthStore(state => state.logIn);
+  const {setToken} = useTokenStore();
 
   const onPressLogin = () => {
-    console.log('submitted with', username, password);
     setError('');
     logIn(
       {username, password},
@@ -51,8 +48,7 @@ export default function Login() {
         onSuccess: async response => {
           const {token} = response.login;
           if (token) {
-            await AsyncStorage.setItem(TOKEN_LOCAL_STORAGE, token);
-            appLogIn();
+            setToken(token);
           } else {
             setError('Token missing from login');
           }

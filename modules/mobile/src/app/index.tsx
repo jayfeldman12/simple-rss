@@ -1,29 +1,19 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Redirect} from 'expo-router';
 import {useEffect} from 'react';
 import {StatusBar, View} from 'react-native';
-import {TOKEN_LOCAL_STORAGE} from '../queries/consts';
-import {useAuthStore} from '../store/authStore';
+import {useTokenStore} from '../store/tokenStore';
 
 export default function App() {
-  const isLoggedIn = useAuthStore(state => state.isLoggedIn);
-  const isLoadingLogin = useAuthStore(state => state.loading);
-  const appLogIn = useAuthStore(state => state.logIn);
-  const appLogOut = useAuthStore(state => state.logOut);
+  const {token, loading: loadingToken} = useTokenStore(
+    state => state.tokenInfo,
+  );
+  const fetchToken = useTokenStore(state => state.fetchToken);
 
   useEffect(() => {
-    const checkLogin = async () => {
-      const token = await AsyncStorage.getItem(TOKEN_LOCAL_STORAGE);
-      if (token) {
-        appLogIn();
-      } else {
-        appLogOut();
-      }
-    };
-    checkLogin();
+    fetchToken();
   }, []);
 
-  if (!isLoadingLogin) {
+  if (loadingToken) {
     return (
       <View>
         <StatusBar />
@@ -31,7 +21,7 @@ export default function App() {
     );
   }
 
-  if (isLoggedIn) {
+  if (token) {
     return <Redirect href={'/feed'} />;
   } else {
     return <Redirect href={'/login'} />;
