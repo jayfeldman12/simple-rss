@@ -1,6 +1,6 @@
 'use client';
 
-import {Errors} from '@simple-rss/common';
+import {errors} from '@simple-rss/common';
 import {useQueryClient} from '@tanstack/react-query';
 import {useCallback, useEffect} from 'react';
 import {useFeedContext} from '../../../context/feedProvider';
@@ -34,7 +34,7 @@ export const useFeeds = (onLogout: () => void, feedId?: string) => {
   const {mutate: markRead} = useMarkRead();
 
   useEffect(() => {
-    if (errorMessage?.includes(Errors.UNAUTHORIZED)) {
+    if (errorMessage?.includes(errors.UNAUTHORIZED)) {
       onLogout();
     }
   }, [errorMessage, onLogout]);

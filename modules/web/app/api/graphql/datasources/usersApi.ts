@@ -146,13 +146,17 @@ export default class UsersApi extends MongoDataSource<User> {
     rssUrl?: Maybe<string>,
   ) => {
     const userPromise = this.getUser(userId, feedApi);
+
+    const feedInfo = await (rssUrl
+      ? feedApi.getFeedInfoFromRssUrl(rssUrl)
+      : feedApi.getFeedInfoFromUrl(url));
+
     const feed: Partial<Feed> = {
       url,
       _id: new ObjectId().toString(),
-      ...(await (rssUrl
-        ? feedApi.getFeedInfoFromRssUrl(rssUrl)
-        : feedApi.getFeedInfoFromUrl(url))),
+      ...feedInfo,
     };
+
     const user = await userPromise;
     if (!user) throw new Error('User not found');
     if (user.feeds.length >= 50) {

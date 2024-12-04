@@ -1,3 +1,3 @@
-export enum Errors {
-  UNAUTHORIZED = 'UNAUTHORIZED',
-}
+export const errors = {
+  UNAUTHORIZED: 'UNAUTHORIZED',
+};
