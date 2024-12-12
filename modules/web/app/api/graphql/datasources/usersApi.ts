@@ -15,6 +15,8 @@ import {
 import {User, WithUserId} from '../models/users';
 import {FeedApi} from './feedApi';
 
+const FEED_REFRESH_TIME_MS = 1000 * 60 * 60 * 24 * 7;
+
 export default class UsersApi extends MongoDataSource<User> {
   protected INVALID_CREDENTIALS = 'Invalid credentials';
 
@@ -35,16 +37,22 @@ export default class UsersApi extends MongoDataSource<User> {
   public refreshFeedInfo = async (user: User, feedApi: FeedApi) => {
     const results = Promise.allSettled(
       user.feeds.map(async feed => {
+        const dateUpdated = feed.dateUpdated;
         const newFeed = {...feed};
-        Object.assign(
-          newFeed,
-          await feedApi.getFeedInfoFromUrl(feed.url, feed.reads),
-        );
-        this.collection.updateOne(
-          {_id: user._id, 'feeds._id': feed._id},
-          {$set: {'feeds.$': newFeed}},
-        );
-        await this.deleteFromCacheById(user._id);
+        if (
+          !dateUpdated ||
+          new Date(dateUpdated).getTime() < Date.now() - FEED_REFRESH_TIME_MS
+        ) {
+          Object.assign(
+            newFeed,
+            await feedApi.getFeedInfoFromUrl(feed.url, feed.reads),
+          );
+          this.collection.updateOne(
+            {_id: user._id, 'feeds._id': feed._id},
+            {$set: {'feeds.$': newFeed}},
+          );
+          await this.deleteFromCacheById(user._id);
+        }
         return newFeed;
       }),
     );
