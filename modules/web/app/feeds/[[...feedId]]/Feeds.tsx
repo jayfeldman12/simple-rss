@@ -38,8 +38,6 @@ const FeedsPage = () => {
     queryClient.refetchQueries({queryKey: ['getFeeds'], exact: false});
   };
 
-  console.log('rendering feeds');
-
   return (
     <Background>
       <Row className="g-0">

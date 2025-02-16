@@ -78,10 +78,9 @@ export const Sidebar = ({
 
               <Button
                 className="sidebar-button"
-                disabled={!fetchAll}
-                onClick={() => setFetchAll(true)}
+                onClick={() => setFetchAll(!fetchAll)}
                 style={{height: buttonHeight}}>
-                Get all items
+                {fetchAll ? 'Show Unreads' : 'Show All'}
               </Button>
 
               <AddFeed
