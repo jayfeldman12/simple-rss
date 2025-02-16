@@ -72,7 +72,7 @@ export const resolvers: ApolloServerOptionsWithTypeDefs<RequestContext>['resolve
         if (!userId) {
           throw new Error(NOT_LOGGED_IN);
         }
-        return usersApi.deleteFeed(userId, new ObjectId(feedId));
+        return usersApi.deleteFeed(userId, feedId);
       },
       markRead: (
         _parent,

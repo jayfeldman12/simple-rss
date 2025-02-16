@@ -170,7 +170,7 @@ export default class UsersApi extends MongoDataSource<User> {
     await this.deleteFromCacheById(userId);
   };
 
-  public deleteFeed = async (userId: ObjectId, feedId: ObjectId) => {
+  public deleteFeed = async (userId: ObjectId, feedId: string) => {
     await this.collection.updateOne(
       {_id: userId},
       {$pull: {feeds: {_id: feedId}}},

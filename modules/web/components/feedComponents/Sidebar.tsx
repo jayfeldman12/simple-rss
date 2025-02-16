@@ -79,12 +79,8 @@ export const Sidebar = ({
               <Button
                 className="sidebar-button"
                 onClick={() => setFetchAll(!fetchAll)}
-                style={{
-                  minHeight: buttonHeight,
-                  display: 'flex',
-                  alignItems: 'center',
-                }}>
-                {fetchAll ? 'Only Unread' : 'Show Read and Unread'}
+                style={{minHeight: buttonHeight}}>
+                {fetchAll ? 'Show Unreads' : 'Show All'}
               </Button>
 
               <AddFeed
