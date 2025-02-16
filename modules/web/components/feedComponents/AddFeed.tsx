@@ -1,7 +1,9 @@
 'use client';
 
 import {useState} from 'react';
+import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
 import SubmitButton from '../common/SubmitButton';
 
 interface AddFeedProps {
@@ -12,26 +14,57 @@ interface AddFeedProps {
 
 export const AddFeed = ({addFeedLoading, error, onSubmit}: AddFeedProps) => {
   const [url, setUrl] = useState('');
+  const [showModal, setShowModal] = useState(false);
+
+  const handleSubmit = () => {
+    onSubmit(url);
+    setShowModal(false);
+    setUrl('');
+  };
+
+  const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSubmit();
+    }
+  };
+
   return (
     <>
-      <div className="py-3 d-flex flex-row add-feed">
-        <Form.Control
-          onChange={e => setUrl(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && onSubmit(e.currentTarget.value)}
-        />
-        <SubmitButton
-          className="mx-2 text-nowrap"
-          isLoading={addFeedLoading}
-          onClick={() => onSubmit(url)}>
-          Add Feed
-        </SubmitButton>
-      </div>
-      {error ? (
-        <h5 className="text-danger">
-          Error adding feed, make sure URL has an RSS feed and is not already a
-          subscription
-        </h5>
-      ) : null}
+      <Button
+        variant="primary"
+        className="sidebar-button"
+        style={{height: '2.5rem', marginLeft: 0}}
+        onClick={() => setShowModal(true)}>
+        Add Feed
+      </Button>
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add Feed</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Control
+            type="text"
+            placeholder="Enter feed URL"
+            value={url}
+            onChange={e => setUrl(e.target.value)}
+            onKeyDown={handleEnter}
+          />
+          {error && (
+            <div className="text-danger mt-2">
+              Error adding feed, make sure URL has an RSS feed and is not
+              already a subscription
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+          <SubmitButton isLoading={addFeedLoading} onClick={handleSubmit}>
+            Add Feed
+          </SubmitButton>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

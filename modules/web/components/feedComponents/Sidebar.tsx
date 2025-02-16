@@ -72,15 +72,19 @@ export const Sidebar = ({
                 disabled={!Object.keys(unreadCountByFeed).length}
                 className="sidebar-button"
                 onClick={markAllRead}
-                style={{height: buttonHeight, marginLeft: 0}}>
+                style={{minHeight: buttonHeight, marginLeft: 0}}>
                 Mark all as read
               </Button>
 
               <Button
                 className="sidebar-button"
                 onClick={() => setFetchAll(!fetchAll)}
-                style={{height: buttonHeight}}>
-                {fetchAll ? 'Show Unreads' : 'Show All'}
+                style={{
+                  minHeight: buttonHeight,
+                  display: 'flex',
+                  alignItems: 'center',
+                }}>
+                {fetchAll ? 'Only Unread' : 'Show Read and Unread'}
               </Button>
 
               <AddFeed
@@ -88,7 +92,14 @@ export const Sidebar = ({
                 onSubmit={addFeed}
                 error={!!addFeedError}
               />
-              <Link href={'/feeds'} className="no-text-change sidebar-button">
+              <Link
+                href={'/feeds'}
+                className="no-text-change sidebar-button"
+                style={{
+                  minHeight: buttonHeight,
+                  display: 'flex',
+                  alignItems: 'center',
+                }}>
                 <p>All feeds</p>
               </Link>
               {feedList?.map((feed, index) => {
@@ -108,13 +119,17 @@ export const Sidebar = ({
                 );
               })}
               <div className="d-flex flex-column align-items-start">
-                <SubmitButton className="my-2 mt-5" onClick={onLogOut}>
+                <SubmitButton
+                  className="my-2 mt-5"
+                  style={{minHeight: buttonHeight}}
+                  onClick={onLogOut}>
                   Log out
                 </SubmitButton>
 
                 {feedId && activeFeed ? (
                   <SubmitButton
                     className="my-4"
+                    style={{minHeight: buttonHeight}}
                     isLoading={deletingFeed}
                     onClick={() => deleteFeedById({feedId})}>
                     Unsubscribe from {activeFeed.title}
@@ -126,6 +141,7 @@ export const Sidebar = ({
                       ? 'border-warning bg-warning'
                       : 'border-danger bg-danger'
                   }`}
+                  style={{minHeight: buttonHeight}}
                   isLoading={deletingUser}
                   onClick={() => setShowReallyDelete(prevValue => !prevValue)}>
                   {showReallyDelete ? 'Never mind' : 'Delete account'}
@@ -133,6 +149,7 @@ export const Sidebar = ({
                 {showReallyDelete ? (
                   <SubmitButton
                     className="my-2 bg-danger border-danger"
+                    style={{minHeight: buttonHeight}}
                     isLoading={deletingUser}
                     onClick={() => deleteUser()}>
                     Really delete?
