@@ -13,74 +13,152 @@ const FeedsPullToRefreshWrapper: React.FC<FeedsPullToRefreshWrapperProps> = ({
 }) => {
   const [pullStartY, setPullStartY] = useState<number | null>(null);
   const [pullDistance, setPullDistance] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const threshold = 70; // pixels to trigger refresh
-  const containerRef = useRef<HTMLDivElement>(null);
+  const indicatorRef = useRef<HTMLDivElement>(null);
 
-  // Use native event listeners with passive: false to override default pull-to-refresh
+  // Use touch events on the window to detect pull-to-refresh gestures
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    // Function to check if we're at the top of the page
+    const isAtTop = () => {
+      return window.scrollY <= 0;
+    };
 
-    const handleTouchStartNative = (e: TouchEvent) => {
-      if (container.scrollTop === 0) {
+    const handleTouchStart = (e: TouchEvent) => {
+      // Only initialize pull-to-refresh when at the very top of the page
+      if (isAtTop()) {
         setPullStartY(e.touches[0].clientY);
       }
     };
 
-    const handleTouchMoveNative = (e: TouchEvent) => {
-      if (pullStartY !== null) {
+    const handleTouchMove = (e: TouchEvent) => {
+      // Only process when we have a valid start point and we're at the top
+      if (pullStartY !== null && isAtTop()) {
         const currentY = e.touches[0].clientY;
         const distance = currentY - pullStartY;
+
+        // Only handle pull-down gestures (positive distance)
         if (distance > 0) {
+          // Prevent the browser's native pull-to-refresh
           e.preventDefault();
-          setPullDistance(distance);
+
+          // Apply resistance factor for more natural feel
+          setPullDistance(distance * 0.4);
+        } else {
+          // User is trying to scroll up/down normally, cancel our pull gesture
+          setPullStartY(null);
+          setPullDistance(0);
         }
       }
     };
 
-    const handleTouchEndNative = () => {
-      if (pullDistance > threshold) {
+    const handleTouchEnd = () => {
+      if (pullDistance > threshold && !isRefreshing) {
+        // Threshold reached, trigger refresh
+        setIsRefreshing(true);
         onRefresh();
-        // Delay resetting the pull state to allow the CSS transition to complete
+
+        // Reset state after animation completes
         setTimeout(() => {
           setPullStartY(null);
           setPullDistance(0);
-        }, 200);
+          setIsRefreshing(false);
+        }, 300);
       } else {
+        // Reset without triggering refresh
         setPullStartY(null);
         setPullDistance(0);
       }
     };
 
-    container.addEventListener('touchstart', handleTouchStartNative, {
-      passive: false,
-    });
-    container.addEventListener('touchmove', handleTouchMoveNative, {
-      passive: false,
-    });
-    container.addEventListener('touchend', handleTouchEndNative, {
-      passive: false,
-    });
+    // Add event listeners to the window
+    window.addEventListener('touchstart', handleTouchStart, {passive: true});
+    window.addEventListener('touchmove', handleTouchMove, {passive: false});
+    window.addEventListener('touchend', handleTouchEnd, {passive: true});
 
     return () => {
-      container.removeEventListener('touchstart', handleTouchStartNative);
-      container.removeEventListener('touchmove', handleTouchMoveNative);
-      container.removeEventListener('touchend', handleTouchEndNative);
+      // Clean up listeners
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [pullStartY, pullDistance, onRefresh]);
+  }, [pullStartY, pullDistance, isRefreshing, onRefresh, threshold]);
+
+  // Loading spinner component
+  const LoadingSpinner = () => (
+    <div
+      style={{
+        opacity: Math.min(1, pullDistance / threshold),
+        width: '24px',
+        height: '24px',
+        border: '3px solid rgba(255, 255, 255, 0.3)',
+        borderRadius: '50%',
+        borderTop: '3px solid #fff',
+        animation: isRefreshing ? 'spin 1s linear infinite' : 'none',
+      }}
+    />
+  );
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        touchAction: 'pan-y',
-        backgroundColor: '#0f083c',
-        minHeight: '100vh',
-        overscrollBehaviorY: 'contain',
-        transform: `translateY(${pullDistance}px)`,
-        transition: pullStartY ? 'none' : 'transform 0.2s ease-out',
-      }}>
-      {children}
+    <div style={{backgroundColor: '#0f083c', minHeight: '100vh'}}>
+      {/* Background overlay to ensure consistent dark background */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: '#0f083c',
+          zIndex: 900,
+          pointerEvents: 'none',
+          opacity: pullDistance > 0 ? 1 : 0,
+          transition: 'opacity 0.2s ease-out',
+        }}
+      />
+
+      {/* Pull-to-refresh indicator */}
+      <div
+        ref={indicatorRef}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: `${pullDistance}px`,
+          backgroundColor: '#0f083c',
+          zIndex: 1000,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          overflow: 'hidden',
+          transition: pullStartY ? 'none' : 'height 0.2s ease-out',
+        }}>
+        {pullDistance > 0 && <LoadingSpinner />}
+      </div>
+
+      {/* Main content */}
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 950,
+          marginTop: `${pullDistance}px`,
+          transition: pullStartY ? 'none' : 'margin-top 0.2s ease-out',
+        }}>
+        {children}
+      </div>
+
+      {/* Add CSS for spinner animation */}
+      <style jsx global>{`
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </div>
   );
 };
