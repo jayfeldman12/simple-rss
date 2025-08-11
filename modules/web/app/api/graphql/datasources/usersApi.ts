@@ -129,7 +129,12 @@ export default class UsersApi extends MongoDataSource<User> {
   ): Promise<number> => {
     try {
       const response = await this.collection.updateOne(
-        {_id: userId, 'feeds._id': new ObjectId(feedId)},
+        // Support both historical ObjectId `_id` values and newer string `_id` values
+        // on embedded `feeds` documents.
+        {
+          _id: userId,
+          $or: [{'feeds._id': feedId}, {'feeds._id': new ObjectId(feedId)}],
+        },
         {$push: {'feeds.$.reads': {$each: [...feedItemIds], $slice: -1000}}},
       );
       await this.deleteFromCacheById(userId);
