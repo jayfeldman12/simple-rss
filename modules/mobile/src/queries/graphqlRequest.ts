@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {request, RequestDocument, Variables} from 'graphql-request';
+import {request, type RequestDocument, type Variables} from 'graphql-request';
 import {TOKEN_LOCAL_STORAGE} from './consts';
 
 const ENDPOINT = 'https://simple-rss-omega.vercel.app/api/graphql';
