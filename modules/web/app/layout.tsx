@@ -27,7 +27,7 @@ export default function Layout({children}: {children: React.ReactNode}) {
       lang="en"
       style={{overscrollBehaviorY: 'none', backgroundColor: '#0f083c'}}>
       <Providers>
-        <body>{children}</body>
+        <body style={{backgroundColor: '#0f083c'}}>{children}</body>
       </Providers>
     </html>
   );
