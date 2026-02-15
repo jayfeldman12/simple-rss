@@ -24,9 +24,7 @@ const mongoClient = new MongoClient(process.env.MONGODB_URI ?? '');
 
 mongoClient.connect();
 const feedApi = new FeedApi();
-const usersApi = new UsersApi({
-  modelOrCollection: mongoClient.db().collection('users'),
-});
+const usersApi = new UsersApi(mongoClient.db().collection('users'));
 
 type RequestContext = {userId?: ObjectId};
 

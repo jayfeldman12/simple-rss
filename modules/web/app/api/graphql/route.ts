@@ -28,10 +28,9 @@ const handler = startServerAndCreateNextHandler<
     if (!token) {
       return {req, res};
     }
-    let rawToken: JWTToken = jwt.verify(
-      token,
-      process.env.JWT_SIGNING!,
-    ) as JWTToken;
+    let rawToken: JWTToken = jwt.verify(token, process.env.JWT_SIGNING!, {
+      algorithms: ['HS256'],
+    }) as JWTToken;
 
     if (!rawToken) {
       return {req, res};
@@ -41,4 +40,5 @@ const handler = startServerAndCreateNextHandler<
   },
 });
 
-export {handler as GET, handler as POST};
+export const GET = (req: NextRequest) => handler(req);
+export const POST = (req: NextRequest) => handler(req);

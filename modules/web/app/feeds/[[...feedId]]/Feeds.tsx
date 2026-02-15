@@ -1,7 +1,6 @@
 'use client';
 
 import {useQueryClient} from '@tanstack/react-query';
-import {Params} from 'next/dist/shared/lib/router/utils/route-matcher';
 import {useParams, useRouter} from 'next/navigation';
 import {useCallback, useState} from 'react';
 import {Row} from 'react-bootstrap';
@@ -12,14 +11,10 @@ import FeedCard from '../../../components/feedComponents/feedCard';
 import FeedsPullToRefreshWrapper from '../FeedsPullToRefreshWrapper';
 import {useFeeds} from './useFeeds';
 
-interface FeedsPageParams extends Params {
-  feedId?: string[];
-}
-
 const FeedsPage = () => {
   const router = useRouter();
-  const params = useParams<FeedsPageParams>();
-  const feedId = params?.feedId?.[0];
+  const params = useParams();
+  const feedId = (params?.feedId as string[] | undefined)?.[0];
   const logOut = useCallback(() => router.push('/login'), [router]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

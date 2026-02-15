@@ -1,8 +1,6 @@
-import {Collection, MongoDataSource} from 'apollo-datasource-mongodb';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import {ObjectId} from 'mongodb';
-import {Document} from 'mongoose';
 import {USER_REFRESH_TIME} from '../../../../utils/consts';
 import {
   CreateUserResponse,
@@ -14,14 +12,12 @@ import {
 } from '../models/types';
 import {User, WithUserId} from '../models/users';
 import {FeedApi} from './feedApi';
+import {MongoDataSource} from './mongoDataSource';
 
 const FEED_REFRESH_TIME_MS = 1000 * 60 * 60 * 24 * 7;
 
 export default class UsersApi extends MongoDataSource<User> {
   protected INVALID_CREDENTIALS = 'Invalid credentials';
-
-  // @ts-expect-error not uninitialized, it's assigned in the super. Declaring here to override type
-  protected collection: Collection<Document>;
 
   public async getUser(
     userId: ObjectId,
@@ -135,7 +131,9 @@ export default class UsersApi extends MongoDataSource<User> {
           _id: userId,
           $or: [{'feeds._id': feedId}, {'feeds._id': new ObjectId(feedId)}],
         },
-        {$push: {'feeds.$.reads': {$each: [...feedItemIds], $slice: -1000}}},
+        {
+          $push: {'feeds.$.reads': {$each: [...feedItemIds], $slice: -1000}},
+        } as any,
       );
       await this.deleteFromCacheById(userId);
       return response.modifiedCount;
@@ -176,10 +174,9 @@ export default class UsersApi extends MongoDataSource<User> {
   };
 
   public deleteFeed = async (userId: ObjectId, feedId: string) => {
-    await this.collection.updateOne(
-      {_id: userId},
-      {$pull: {feeds: {_id: feedId}}},
-    );
+    await this.collection.updateOne({_id: userId}, {
+      $pull: {feeds: {_id: feedId}},
+    } as any);
     await this.deleteFromCacheById(userId);
   };
 

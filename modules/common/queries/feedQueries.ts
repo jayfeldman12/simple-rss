@@ -1,4 +1,4 @@
-import {gql} from 'graphql-request';
+import gql from 'graphql-tag';
 
 export const FeedQuery = gql`
   query FeedQuery($onlyUnread: Boolean, $feedId: String) {
