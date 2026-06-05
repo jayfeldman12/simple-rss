@@ -1,5 +1,6 @@
 import {
   AddFeed,
+  CreateUser,
   DeleteFeed,
   DeleteUser,
   FeedQuery,
@@ -171,7 +172,7 @@ export const useCreateAccount = (
 ) => {
   return useMutation<CreateUserResponse, Error, MutationCreateUserArgs>({
     mutationFn: async (variables: MutationCreateUserArgs) =>
-      graphqlRequest(Login, {...variables}),
+      graphqlRequest(CreateUser, {...variables}),
     ...options,
   });
 };
