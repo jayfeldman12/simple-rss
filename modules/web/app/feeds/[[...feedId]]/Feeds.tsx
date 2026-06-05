@@ -2,12 +2,13 @@
 
 import {useQueryClient} from '@tanstack/react-query';
 import {useParams, useRouter} from 'next/navigation';
-import {useCallback, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {Row} from 'react-bootstrap';
 import {Spinner} from '../../../components/common/Spinner';
 import {Background} from '../../../components/common/background';
 import {Sidebar} from '../../../components/feedComponents/Sidebar';
 import FeedCard from '../../../components/feedComponents/feedCard';
+import {useTokenContext} from '../../../context/tokenProvider';
 import FeedsPullToRefreshWrapper from '../FeedsPullToRefreshWrapper';
 import {useFeeds} from './useFeeds';
 
@@ -17,6 +18,17 @@ const FeedsPage = () => {
   const feedId = (params?.feedId as string[] | undefined)?.[0];
   const logOut = useCallback(() => router.push('/login'), [router]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const {token, hasFetched: hasFetchedToken} = useTokenContext();
+
+  useEffect(() => {
+    if (hasFetchedToken) {
+      if (token) {
+        router.replace('feeds');
+      } else {
+        router.replace('login');
+      }
+    }
+  }, [hasFetchedToken, router, token]);
 
   const {
     errorMessage,
